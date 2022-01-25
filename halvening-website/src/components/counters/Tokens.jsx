@@ -1,6 +1,7 @@
 import React, { useState, useEffect} from 'react'
 import useIntervalFetch from "../../hooks/useIntervalFetch";
-import {Spinner,ProgressBar, Stack, Badge} from 'react-bootstrap'
+import {Spinner,ProgressBar, Stack} from 'react-bootstrap';
+import moment from 'moment';
 
 function format(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -12,26 +13,34 @@ function addZero(i) {
 }
 
 const Tokens = () => {
-    const dataURL = "https://0xbtc.info/api/stats.json"
+    const dataURL = "https://0xbtc.info/api/stats.json";
+    
     const { data, isPending, error } = useIntervalFetch(dataURL);
     const [maxSupplyInCurrentEra, setMaxSupplyInCurrentEra] = useState(null)
     const [circulatingSupply, setcirculatingSupply] = useState(null);
     const [tokensUntilHalvening, setTokensUntilHalvening] = useState(null);
+    const [timeUntilHalvening, setTimeUntilHalvening] = useState(null);
     const [lastRewardAmount, setLastRewardAmount] = useState(null);
     const [progress, setProgress] = useState(null);
-    const [time, setTime] = useState("")
+    const [time, setTime] = useState("");
     
     useEffect(() => {
         if (isPending || (data === null && error === null)) {
             return;
         }
         if (data) {
+            let formattedEraSupply = data.maxSupplyForEra/Math.pow(10,8)
+            let tokensRemaining = formattedEraSupply-data.circulatingSupply;
+            let formattedRewardAmount = data.lastRewardAmount/Math.pow(10,8)
+            let blocksRemaining = tokensRemaining/formattedRewardAmount;
+            let blockTime = (data.secondsPerReward+60*13) / 2;
+
             setcirculatingSupply(data.circulatingSupply);
-            let formattedSupply = data.maxSupplyForEra/Math.pow(10,8)
-            setMaxSupplyInCurrentEra(formattedSupply);
-            setTokensUntilHalvening(formattedSupply-data.circulatingSupply);
-            setProgress(data.circulatingSupply/formattedSupply*100);
-            setLastRewardAmount(data.lastRewardAmount/Math.pow(10,8));
+            setMaxSupplyInCurrentEra(formattedEraSupply);
+            setTokensUntilHalvening(tokensRemaining);
+            setProgress(data.circulatingSupply/formattedEraSupply*100);
+            setLastRewardAmount(formattedRewardAmount);
+            setTimeUntilHalvening(moment.duration(blocksRemaining*blockTime, 'seconds').humanize());
         }
         const d = new Date();
         let h = addZero(d.getHours());
@@ -44,7 +53,7 @@ const Tokens = () => {
     return (
         <div>
             {circulatingSupply ? (  
-                    <Stack direction="vertical" className='mb-4 mt-4' gap={3}>
+                    <Stack direction="vertical" className='mb-2 mt-4' gap={3}>
                             <h1>The Halvening progress is:</h1>
                             <h2>
                                 {format(circulatingSupply)+"/"+format(maxSupplyInCurrentEra)}
@@ -53,8 +62,8 @@ const Tokens = () => {
                                 label={`${progress.toFixed(2)}%`} style={{height:"4rem"}}
                             />
                             <h3 className='mt-2'>There are {format(tokensUntilHalvening)} tokens left to mine </h3>
-                            <h5>The reward will drop to {lastRewardAmount/2} 0xBTC </h5>
-                            <h4 style={{color:"gray"}}>Updated {time}</h4>
+                            <h5>The reward will drop to {lastRewardAmount/2} 0xBTC in ~{timeUntilHalvening}*</h5>
+                            <h7 style={{color:"gray"}}>Updated at {time}</h7>
                     </Stack>
             ) : (
                 <div>
