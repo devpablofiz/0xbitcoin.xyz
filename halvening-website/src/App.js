@@ -6,7 +6,7 @@ import {DiscordCard, OneInchCard, Tokens} from './components'
 function App() {
   return (
     <div className="App">  
-      <Navbar sticky="top" bg="success">
+      <Navbar sticky="top" bg="success" variant="dark">
         <Container>
           <Navbar.Brand href="#home">
             <img
@@ -15,8 +15,8 @@ function App() {
             width="30"
             height="30"
             className="d-inline-block align-top"
-          />{' '}
-          Halvening for 0xBitcoin
+           />{' '}
+           0xBitcoin Halvening
           </Navbar.Brand>
         </Container>
       </Navbar>
