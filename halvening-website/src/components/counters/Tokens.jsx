@@ -27,9 +27,10 @@ const Tokens = () => {
         }
         if (data) {
             setcirculatingSupply(data.circulatingSupply);
-            setMaxSupplyInCurrentEra(data.maxSupplyForEra/Math.pow(10,8));
-            setTokensUntilHalvening(maxSupplyInCurrentEra-data.circulatingSupply);
-            setProgress(data.circulatingSupply/maxSupplyInCurrentEra*100);
+            let formattedSupply = data.maxSupplyForEra/Math.pow(10,8)
+            setMaxSupplyInCurrentEra(formattedSupply);
+            setTokensUntilHalvening(formattedSupply-data.circulatingSupply);
+            setProgress(data.circulatingSupply/formattedSupply*100);
             setLastRewardAmount(data.lastRewardAmount/Math.pow(10,8));
         }
         const d = new Date();
