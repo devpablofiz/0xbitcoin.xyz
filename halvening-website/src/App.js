@@ -1,25 +1,12 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {Navbar, Container, Row, Col} from 'react-bootstrap'
-import {DiscordCard, OneInchCard, Tokens} from './components'
+import {Container, Row, Col} from 'react-bootstrap'
+import {DiscordCard, OneInchCard, Tokens, MyNavBar} from './components'
 
 function App() {
   return (
     <div className="App">  
-      <Navbar sticky="top" bg="success" variant="dark">
-        <Container>
-          <Navbar.Brand href="#home">
-            <img
-            alt=""
-            src="/0xbitcoin-logo.svg"
-            width="30"
-            height="30"
-            className="d-inline-block align-top"
-           />{' '}
-           0xBitcoin Halvening
-          </Navbar.Brand>
-        </Container>
-      </Navbar>
+      <MyNavBar/>
       <div className="App-body">
         <Tokens/>
         <Container>

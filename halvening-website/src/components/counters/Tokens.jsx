@@ -63,7 +63,7 @@ const Tokens = () => {
                             />
                             <h3 className='mt-2'>There are {format(tokensUntilHalvening)} tokens left to mine </h3>
                             <h5>The reward will drop to {lastRewardAmount/2} 0xBTC in ~{timeUntilHalvening}*</h5>
-                            <h7 style={{color:"gray"}}>Updated at {time}</h7>
+                            <h7 style={{color:"gray"}} className='mb-2'>Updated at {time}</h7>
                     </Stack>
             ) : (
                 <div>
