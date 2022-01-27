@@ -58,7 +58,7 @@ const MyNavBar = () => {
           height="30"
           className="d-inline-block align-top"
          />{' '}
-         0xBitcoin Halvening
+         0xBitcoin
         </Navbar.Brand>
       </Container>
       <Container className="justify-content-end">
