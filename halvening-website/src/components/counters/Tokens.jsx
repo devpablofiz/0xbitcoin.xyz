@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from 'react'
 import useIntervalFetch from "../../hooks/useIntervalFetch";
-import {Spinner,ProgressBar, Stack} from 'react-bootstrap';
+import {Spinner,ProgressBar, Stack, ListGroup} from 'react-bootstrap';
 import moment from 'moment';
 
 function format(x) {
@@ -53,17 +53,27 @@ const Tokens = () => {
     return (
         <div>
             {circulatingSupply ? (  
-                    <Stack direction="vertical" className='mb-2 mt-4' gap={3}>
-                            <h1>The Halvening progress is:</h1>
-                            <h2>
-                                {format(circulatingSupply)+"/"+format(maxSupplyInCurrentEra)}
-                            </h2>
-                            <ProgressBar animated variant="success" now={circulatingSupply} max={maxSupplyInCurrentEra}
-                                label={`${progress.toFixed(2)}%`} style={{height:"4rem"}}
-                            />
-                            <h3 className='mt-2'>There are {format(tokensUntilHalvening)} tokens left to mine </h3>
-                            <h5>The reward will drop to {lastRewardAmount/2} 0xBTC in ~{timeUntilHalvening}*</h5>
-                            <h7 style={{color:"gray"}} className='mb-2'>Updated at {time}</h7>
+                    <Stack direction="vertical" className='mb-1' gap={3}>
+                        <ListGroup variant='flush' className='list-group-custom'>
+                            <ListGroup.Item className='list-group-custom-item'> 
+                            </ListGroup.Item>
+                            <ListGroup.Item className='list-group-custom-item'>
+                                <h2>Halvening Progress</h2>
+                                <h2>
+                                    {format(circulatingSupply)+"/"+format(maxSupplyInCurrentEra)}
+                                </h2>
+                                <ProgressBar animated variant="dark" className='mb-2' now={circulatingSupply} max={maxSupplyInCurrentEra}
+                                    label={`${progress.toFixed(2)}%`} style={{height:"4rem"}}
+                                />
+                            </ListGroup.Item>
+                            <ListGroup.Item className='list-group-custom-item'>
+                                <h3>There are {format(tokensUntilHalvening)} tokens left to mine </h3>
+                                <h5>The reward will drop to {lastRewardAmount/2} 0xBTC in ~{timeUntilHalvening}*</h5>
+                            </ListGroup.Item>
+                            <ListGroup.Item className='list-group-custom-item'>
+                                <h7 style={{color:"gray"}} className='mb-2'>Updated at {time}</h7>
+                            </ListGroup.Item>
+                        </ListGroup>
                     </Stack>
             ) : (
                 <div>
