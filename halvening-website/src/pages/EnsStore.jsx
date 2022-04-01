@@ -19,14 +19,14 @@ const EnsStore = ({
 	const [disabled, setDisabled] = useState(true);
 	const [loading, setLoading] = useState(false);
 
-	const subdomain = useRef(null);
+	const fieldsubdomain = useRef(null);
 
 	const checkAvailable = async (subdomain) => {
 		setLoading(true);
 
 		setSelectedSubdomain(subdomain);
 
-		if(subdomain.length === 0){
+		if(subdomain.length === 0 || subdomain.includes(".")){
 			setDisabled(true);
 			setLoading(false);
 			return;
@@ -83,8 +83,8 @@ const EnsStore = ({
   				  		placeholder="🔍 Search names here"
 						id="subdomain"
 						type="text"
-						ref={subdomain}
-						onChange={(event) => checkAvailable(event.target.value)}
+						ref={fieldsubdomain}
+						onChange={(event) => checkAvailable((event.target.value).toLowerCase())}
   				  	/>
 					<DropdownButton variant="secondary" title={"."+selectedDomain+".eth"}>
 						<Dropdown.Item onClick={() => setSelectedDomain("not0xbitcoin")}>.not0xbitcoin.eth</Dropdown.Item>
