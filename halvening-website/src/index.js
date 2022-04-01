@@ -1,13 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import App from "./App";
+import { positions, Provider } from "react-alert";
+import AlertTemplate from "react-alert-template-basic";
 
-import "@fontsource/titillium-web/400.css";
-import App from './App';
+const options = {
+  timeout: 5000,
+  position: positions.BOTTOM_CENTER
+};
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Provider template={AlertTemplate} {...options}>
+  <App/>
+  </Provider>,
   document.getElementById('root')
 );
 

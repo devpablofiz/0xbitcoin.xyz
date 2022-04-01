@@ -1,0 +1,9 @@
+const addresses = {
+	xbtc: "0x244aA29426fb6524760bD9AcbB66ad53C5EB32CA",
+	store: "0x23dA448cEe0cD444786Fd14f3DaD5Dac86cD0D0C",
+	rinkebyResolver: "0xf6305c19e814d2a75429Fd637d01F7ee0E77d615",
+	resolver: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+	null: "0x0000000000000000000000000000000000000000"
+};
+
+export default addresses;

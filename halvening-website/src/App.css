@@ -44,11 +44,19 @@ body {
   font-family: 'Titillium Web', sans-serif;
 }
 
+.nav-link {
+  color: white !important;
+}
+
 .card.color-card{
   background-color: var(--secondary-color);
   
   font-family: 'Titillium Web', sans-serif;
   color: white;
+}
+
+button:focus {
+  box-shadow: none !important;
 }
 
 .list-group-custom .list-group-custom-item{

@@ -1,55 +1,111 @@
+import React,{ useState, useEffect} from 'react'
+import {EnsStore, Home, Halvening, NotFound} from './pages/'
+import {MyNavBar} from './components'
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import useWeb3Modal from "./hooks/useWeb3Modal";
+import ENS, { getEnsAddress } from "@ensdomains/ensjs";
+
 import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css'
-import {Container, Row, Col} from 'react-bootstrap'
-import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-import {DiscordCard, OneInchCard, Tokens, MyNavBar} from './components'
-/*
-:root {
-  --main-bg-color: #13161f;
-  --secondary-color: #F7931A;
-  --font-color: white;
-}
-
-:root {
-  --main-bg-color: white;
-  --secondary-color: #F7931A;
-  --font-color-dark: #1C1F30;
-}
-*/
-
-function switchMode(checked) {
-  let r = document.querySelector(':root');
-
-  //button starts checked and white theme on
-  if(!checked){
-    //set to dark theme
-    r.style.setProperty('--main-bg-color','#13161f')
-    r.style.setProperty('--secondary-color','#F7931A')
-    r.style.setProperty('--font-color','white')
-  }else{
-    //set to white theme
-    r.style.setProperty('--main-bg-color','white')
-    r.style.setProperty('--secondary-color','#F7931A')
-    r.style.setProperty('--font-color','#1C1F30')
-  }
-}
+import 'bootstrap/dist/css/bootstrap.min.css' 
+import "@fontsource/titillium-web/400.css";
 
 function App() {
+	const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
+
+	const [account, setAccount] = useState(null);
+	const [ensName, setEnsName] = useState(null);
+	const [chain, setChain] = useState(null);
+	// Subscribe to accounts change
+
+	const handleAccountsChanged = async (accounts) => {
+		setAccount(accounts[0]);
+	};
+
+	const handleChainChanged = (_chainId) => {
+		// We recommend reloading the page, unless you must do otherwise
+		if (parseInt(_chainId) === 4) {
+			setChain(4);
+		} else {
+			setChain(1);
+		}
+	};
+
+	useEffect(() => {
+		if (provider !== undefined) {
+			provider
+				.request({ method: "eth_chainId" })
+				.then(handleChainChanged)
+				.catch((err) => {
+					// Some unexpected error.
+					// For backwards compatibility reasons, if no accounts are available,
+					// eth_accounts will return an empty array.
+					console.error(err);
+				});
+			provider
+				.request({ method: "eth_accounts" })
+				.then(handleAccountsChanged)
+				.catch((err) => {
+					// Some unexpected error.
+					// For backwards compatibility reasons, if no accounts are available,
+					// eth_accounts will return an empty array.
+					console.error(err);
+				});
+			provider.on("chainChanged", handleChainChanged);
+			provider.on("accountsChanged", handleAccountsChanged);
+			if (account != null) {
+				const ens = new ENS({
+					provider,
+					ensAddress: getEnsAddress("1"),
+				});
+				ens.getName(account).then((res) => setEnsName(res));
+			}
+		}
+	}, [provider, account]);
+
   return (
-    <>
-      <MyNavBar/>
-      <div className="App-body">
-        <Tokens/>        
-        <Container>
-          <Row xs={1} md={2} className="g-4 justify-content-evenly" >
-            <Col style={{width:"30rem"}}><DiscordCard/></Col>
-            <Col style={{width:"30rem"}}><OneInchCard/></Col>
-          </Row>
-        </Container>
-        <h6 style={{color:"gray"}} className='mt-3'>*time estimation based on the average between target reward time and current average reward time</h6>
-      </div>
-    </>
-  );
+    <Router>
+        <MyNavBar 
+            provider={provider}
+            loadWeb3Modal={loadWeb3Modal}
+            logoutOfWeb3Modal={logoutOfWeb3Modal}
+            account={account}
+            ensName={ensName}
+        />
+        <Switch>
+            <Route exact path="/">
+                <Home
+                    provider={provider} 
+                    loadWeb3Modal={loadWeb3Modal}
+                    logoutOfWeb3Modal={logoutOfWeb3Modal}
+                    account={account} 
+                    chain={chain}
+                />
+            </Route>
+            <Route path="/home">
+              <Home
+                    provider={provider} 
+                    loadWeb3Modal={loadWeb3Modal}
+                    logoutOfWeb3Modal={logoutOfWeb3Modal}
+                    account={account} 
+                    chain={chain}
+              />
+            </Route>
+            <Route path="/ens">
+                <EnsStore 
+                    provider={provider} 
+                    loadWeb3Modal={loadWeb3Modal}
+                    logoutOfWeb3Modal={logoutOfWeb3Modal}
+                    account={account}
+                    chain={chain}
+                />
+            </Route>
+            <Route path="/halvening">
+                <Halvening/>
+            </Route>
+            <Route component={NotFound} />
+        </Switch>
+    </Router>
+  )
 }
 
 export default App;

@@ -1,12 +1,32 @@
 import React,{ useState, useEffect} from 'react'
 import '../../App.css';
-import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-import {Navbar,Container} from 'react-bootstrap'
+import {Navbar,Container, DropdownButton, Dropdown} from 'react-bootstrap'
+import { Link } from "react-router-dom";
 
 
+const MyNavBar = ({
+	provider,
+	loadWeb3Modal,
+	logoutOfWeb3Modal,
+	account,
+	ensName,
+}) => {	
+  const [stateEnsName, setEnsName] = useState(ensName);
+	let foundEns = null;
 
-const MyNavBar = () => {
+	if (stateEnsName != null && stateEnsName.name != null) {
+		foundEns = 123;
+	}
+
+	useEffect(() => {
+		if (ensName != null) {
+			setEnsName(ensName);
+		}
+	}, [ensName]);
+  
   const [theme, setTheme] = useState(true);
+
+  const handleClick = () => switchMode(!theme);
 
   function switchMode(checked) {
     let r = document.querySelector(':root');
@@ -49,29 +69,28 @@ const MyNavBar = () => {
 
   return (
     <Navbar className="color-nav" variant="dark">
-      <Container>
-        <Navbar.Brand href="#home">
-          <img
-          alt=""
-          src="/0xbitcoin-logo.svg"
-          width="30"
-          height="30"
-          className="d-inline-block align-top"
-         />{' '}
-         0xBitcoin
+      <Container fluid>
+        <Navbar.Brand>
+         <Link style={{ color: "white", textDecoration: 'none' }} to="/home">
+            <img
+             alt=""
+             src="/0xbitcoin-logo.svg"
+             width="30"
+             height="30"
+             className="d-inline-block align-top"
+            />{' '}
+            0xBitcoin
+          </Link>
         </Navbar.Brand>
-      </Container>
-      <Container className="justify-content-end">
-        <Navbar.Brand target='_blank' href="https://github.com/fappablo/halvening-website">
-          <img
-          alt=""
-          src="/GitHub-Mark-Light-64px.png"
-          width="30"
-          height="30"
-          className="d-inline-block align-top"
-         />{' '}
-        </Navbar.Brand>
-        <BootstrapSwitchButton checked={theme} onlabel='☀️' offlabel='🌙' onstyle='warning' offstyle='dark' onChange={(checked)=>switchMode(checked)}/>
+        <DropdownButton align="end" variant="light" title={account ? (foundEns ? stateEnsName.name : account) : "Menu"}>
+          <Dropdown.Item onClick={!provider ? loadWeb3Modal : logoutOfWeb3Modal}>{!account ? "Connect Wallet" : "Disconnect Wallet"}</Dropdown.Item>
+          <Dropdown.Divider/>
+          <Link className='dropdown-item' to="/home">Home</Link>
+          <Link className='dropdown-item' to="/ens">Register Subdomain</Link>
+          <Link className='dropdown-item' to="/halvening">Watch The Halvening</Link>
+          <Dropdown.Divider />
+          <Dropdown.Item onClick={handleClick}>Toggle Theme</Dropdown.Item>
+        </DropdownButton>
       </Container>
     </Navbar>
   )

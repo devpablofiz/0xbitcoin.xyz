@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 
@@ -15,7 +15,7 @@ function useWeb3Modal(config = {}) {
 
   // Web3Modal also supports many other wallets.
   // You can see other options at https://github.com/Web3Modal/web3modal
-  const web3Modal = new Web3Modal({
+  const web3Modal = useMemo(() => new Web3Modal({
     network: NETWORK,
     cacheProvider: true,
     providerOptions: {
@@ -26,7 +26,7 @@ function useWeb3Modal(config = {}) {
         },
       },
     },
-  });
+  }), [NETWORK,infuraId]);
 
   // Open wallet selection modal.
   const loadWeb3Modal = useCallback(async () => {
