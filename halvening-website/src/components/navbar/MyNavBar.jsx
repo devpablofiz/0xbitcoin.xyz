@@ -24,7 +24,7 @@ const MyNavBar = ({
 		}
 	}, [ensName]);
   
-  const [theme, setTheme] = useState(true);
+  const [theme, setTheme] = useState(false);
 
   const handleClick = () => switchMode(!theme);
 
@@ -54,15 +54,15 @@ const MyNavBar = ({
 
     //first time loading?
     if(localTheme !== "dark" && localTheme !== "white"){
-      localStorage.setItem("theme","white");
+      localStorage.setItem("theme","dark");
     }
 
-    if(localTheme === "dark"){
-      switchMode(false);
-      setTheme(false);
-    }else{
+    if(localTheme === "white"){
       switchMode(true);
       setTheme(true);
+    }else{
+      switchMode(false);
+      setTheme(false);
     }
 
   }, [theme]);
@@ -82,7 +82,7 @@ const MyNavBar = ({
             0xBitcoin
           </Link>
         </Navbar.Brand>
-        <DropdownButton align="end" variant="light" title={account ? (foundEns ? stateEnsName.name : account) : "Menu"}>
+        <DropdownButton align="end" variant="light" title={account ? (foundEns ? stateEnsName.name : account.substring(0,12)) : "Menu"}>
           <Dropdown.Item onClick={!provider ? loadWeb3Modal : logoutOfWeb3Modal}>{!account ? "Connect Wallet" : "Disconnect Wallet"}</Dropdown.Item>
           <Dropdown.Divider/>
           <Link className='dropdown-item' to="/home">Home</Link>

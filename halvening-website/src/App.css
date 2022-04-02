@@ -1,9 +1,8 @@
 :root {
-  --main-bg-color: white;
+  --main-bg-color: #13161f;
   --secondary-color: #F7931A;
-  --font-color: #1C1F30;
+  --font-color: white;
 }
-
 
 .App-logo {
   height: 40vmin;
@@ -11,7 +10,7 @@
 }
 
 .App-body {
-  background-color: var( --main-bg-color);
+  background-color: var(--main-bg-color);
   min-height: 100vh;
   font-family: 'Titillium Web', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -64,3 +63,5 @@ button:focus {
   color: var(--font-color);
   border-color: var(--font-color);
 }
+
+
