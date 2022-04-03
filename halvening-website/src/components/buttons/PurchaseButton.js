@@ -166,9 +166,12 @@ const PurchaseButton = ({
 		document.querySelector(".form-control").disabled = false;
 		document.querySelector(".btn-secondary").disabled = false;
 		return (
+			<>
+			<Button variant="dark" target='_blank' href={"https://app.ens.domains/name/"+subdomain+"."+domain+".eth/details"}> View on ENS </Button>
 			<Button variant="primary" onClick={setAsPrimary}>
 				{"Set this as my primary name!"}
 			</Button>
+			</>
 		);
 	}
 

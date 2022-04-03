@@ -65,6 +65,12 @@ body {
   color: #13161f;
 }
 
+.white-border{
+  border-radius: 20px;
+  border: 2px solid;
+  border-color: var(--cool-gray);
+}
+
 .rhap_container{
   border-radius: 25px;
   border: 2px solid;

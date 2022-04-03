@@ -74,6 +74,13 @@ const EnsStore = ({
 				<Stack direction="vertical" gap={3} className="col-md-2 mt-4 mx-auto">
 					  <Button variant="dark" onClick={!provider ? loadWeb3Modal : logoutOfWeb3Modal}>{!account ? "Connect Wallet" : "Disconnect Wallet"}</Button>
 				</Stack>
+				<Stack direction="vertical" gap={1} className="col-md-3 mx-auto" >
+				<div className="white-border">
+					<h2 className="mb-2 mt-2">Info</h2>
+					<h6>20% of the revenue is shared with <a target='_blank' rel="noreferrer" href='https://guild.0xbtc.io/'>The Guild</a></h6>
+					<h6 className="mb-3 mt-2"><a variant="dark" target='_blank' rel="noreferrer" href={"https://etherscan.io/address/"+addresses.store}> View Contract </a></h6>
+				</div>
+			</Stack>
 			</div>
 		)
 	}
@@ -106,6 +113,13 @@ const EnsStore = ({
   					</InputGroup>
 					<PurchaseButton provider={provider} subdomain={selectedSubdomain} domain={selectedDomain} disabled={disabled} loading={loading} account={account}></PurchaseButton>
     		</Stack>
+			<Stack direction="vertical" gap={1} className="col-md-3 mx-auto" >
+				<div className="white-border">
+					<h2 className="mb-2 mt-2">Info</h2>
+					<h6>20% of the revenue is shared with <a target='_blank' rel="noreferrer" href='https://guild.0xbtc.io/'>The Guild</a></h6>
+					<h6 className="mb-3 mt-2"><a variant="dark" target='_blank' rel="noreferrer" href={"https://etherscan.io/address/"+addresses.store}> View Contract </a></h6>
+				</div>
+			</Stack>
         </div>
     )
 }
