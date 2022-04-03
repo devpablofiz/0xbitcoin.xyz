@@ -71,7 +71,7 @@ const Tokens = () => {
                                 <h5>The reward will drop to {lastRewardAmount/2} 0xBTC in ~{timeUntilHalvening}*</h5>
                             </ListGroup.Item>
                             <ListGroup.Item className='list-group-custom-item'>
-                                <h7 style={{color:"gray"}} className='mb-2'>Updated at {time}</h7>
+                                <h6 style={{color:"gray"}} className='mb-2'>Updated at {time}</h6   >
                             </ListGroup.Item>
                         </ListGroup>
                     </Stack>

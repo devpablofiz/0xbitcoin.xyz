@@ -5,6 +5,8 @@ import { Web3Provider } from "@ethersproject/providers";
 import Loader from "react-loader-spinner";
 import { useAlert } from "react-alert";
 import {Button,Modal} from 'react-bootstrap';
+import { Link } from "react-router-dom";
+
 
 const PurchaseButton = ({ 
 	provider, 
@@ -184,6 +186,7 @@ const PurchaseButton = ({
 			<Button disabled = {disabled || loading || (price > bal)} variant="dark" onClick={handleShow}>
 				{disabled ? "Not Available" : ((price > bal) ? price+" 0xBTC Required" : "Purchase")}
 			</Button>
+			<Button variant="dark" hidden = {disabled || (bal > price)} target='_blank' href="https://app.1inch.io/#/1/swap/ETH/0xBTC">Buy 0xBTC</Button> 
       		<Modal
 	  			show={show}
 	  			onHide={handleClose}
@@ -195,7 +198,9 @@ const PurchaseButton = ({
 					<Modal.Title>Confirm Screen</Modal.Title>
 	  			</Modal.Header>
 	  			<Modal.Body>
-					{"You are about to buy "+subdomain+"."+domain+".eth for "+price+" 0xBTC"}
+				  	<p>{"You are about to buy "+subdomain+"."+domain+".eth for a one time fee of "+price+" 0xBTC"}</p>
+					<p>{"You will receive full ownership of the subdomain"}</p>
+					<p>{"There will be an option to set this as your primary ENS name"}</p>
 	  			</Modal.Body>
 	  			<Modal.Footer>
 					<Button variant="dark" disabled={!popupButtonEnabled} onClick={purchaseSubdomain} >Confirm</Button>

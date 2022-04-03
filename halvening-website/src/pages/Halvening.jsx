@@ -2,6 +2,9 @@ import '../App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import {Container, Row, Col} from 'react-bootstrap'
 import {DiscordCard, OneInchCard, Tokens} from '../components'
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';
+
 
 function Halvening() {
   return (
@@ -12,6 +15,7 @@ function Halvening() {
           <Row xs={1} md={2} className="g-4 justify-content-evenly" >
             <Col style={{width:"30rem"}}><DiscordCard/></Col>
             <Col style={{width:"30rem"}}><OneInchCard/></Col>
+            <Col><AudioPlayer src="https://cdn.discordapp.com/attachments/513191271377141773/960119274297503744/pumpItUp.ogg" autoPlay={true} loop={true} volume = {0.1}/></Col>
           </Row>
         </Container>
         <h6 style={{color:"gray"}} className='mt-3'>*time estimation based on the average between target reward time and current average reward time</h6>

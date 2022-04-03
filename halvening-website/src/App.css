@@ -2,6 +2,7 @@
   --main-bg-color: #13161f;
   --secondary-color: #F7931A;
   --font-color: white;
+  --cool-gray: #C1C1C1;
 }
 
 .App-logo {
@@ -43,15 +44,30 @@ body {
   font-family: 'Titillium Web', sans-serif;
 }
 
+.modal{
+  color: var(--main-bg-color);
+  font-family: 'Titillium Web', sans-serif;
+}
+
+.modal-footer {
+  padding: 0.5rem !important;
+}
+
 .nav-link {
   color: white !important;
 }
 
 .card.color-card{
-  background-color: var(--secondary-color);
+  background-color: var(--cool-gray);
   
   font-family: 'Titillium Web', sans-serif;
-  color: white;
+  color: #13161f;
+}
+
+.rhap_container{
+  border-radius: 25px;
+  border: 2px solid;
+  border-color: var(--cool-gray) !important;
 }
 
 button:focus {
@@ -63,5 +79,3 @@ button:focus {
   color: var(--font-color);
   border-color: var(--font-color);
 }
-
-
