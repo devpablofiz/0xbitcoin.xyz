@@ -42,6 +42,7 @@ body {
 .color-nav{
   background-color: var(--secondary-color);
   font-family: 'Titillium Web', sans-serif;
+  z-index: 10;
 }
 
 .modal{
@@ -78,4 +79,18 @@ button:focus {
   background-color: var(--main-bg-color);
   color: var(--font-color);
   border-color: var(--font-color);
+}
+
+#background-video {
+  pointer-events: none;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 5;
+  opacity: 0.03 !important;
 }

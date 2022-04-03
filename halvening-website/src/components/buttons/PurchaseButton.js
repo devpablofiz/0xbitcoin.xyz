@@ -5,7 +5,6 @@ import { Web3Provider } from "@ethersproject/providers";
 import Loader from "react-loader-spinner";
 import { useAlert } from "react-alert";
 import {Button,Modal} from 'react-bootstrap';
-import { Link } from "react-router-dom";
 
 
 const PurchaseButton = ({ 
