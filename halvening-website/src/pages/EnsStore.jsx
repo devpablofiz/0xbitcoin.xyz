@@ -19,7 +19,7 @@ const EnsStore = ({
 }) => {
 
 	const [selectedDomain, setSelectedDomain] = useState("not0xbitcoin");
-	const [selectedSubdomain, setSelectedSubdomain] = useState("welove");
+	const [selectedSubdomain, setSelectedSubdomain] = useState("");
 	const [disabled, setDisabled] = useState(true);
 	const [loading, setLoading] = useState(false);
 

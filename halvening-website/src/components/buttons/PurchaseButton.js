@@ -27,8 +27,8 @@ const PurchaseButton = ({
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
 	
-	const [price, setPrice] = useState("...");
-	const [bal, setBal] = useState(0)
+	const [price, setPrice] = useState(null);
+	const [bal, setBal] = useState(null)
 	const [popupButtonEnabled, setPopupButtonEnabled] = useState(true);
 
 	useEffect(() => {
@@ -186,9 +186,9 @@ const PurchaseButton = ({
 	return (
 		<>
 			<Button disabled = {disabled || loading || (price > bal)} variant="dark" onClick={handleShow}>
-				{disabled ? "Not Available" : ((price > bal) ? price+" 0xBTC Required" : "Purchase")}
+				{disabled ? "Not Available" : (((bal && price) && price > bal) ? price+" 0xBTC Required" : "Purchase")}
 			</Button>
-			<Button variant="dark" hidden = {disabled || (bal > price)} target='_blank' href="https://app.1inch.io/#/1/swap/ETH/0xBTC">Buy 0xBTC</Button> 
+			<Button variant="dark" hidden = {(bal && price) ? (bal > price) : true} target='_blank' href="https://app.1inch.io/#/1/swap/ETH/0xBTC">Buy 0xBTC</Button> 
       		<Modal
 	  			show={show}
 	  			onHide={handleClose}
