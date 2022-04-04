@@ -105,7 +105,6 @@ const EnsStore = ({
   					  	/>
 						<DropdownButton variant="secondary" title={"."+selectedDomain+".eth"}>
 							<Dropdown.Item onClick={() => setSelectedDomain("not0xbitcoin")}>.not0xbitcoin.eth</Dropdown.Item>
-							<Dropdown.Item onClick={() => setSelectedDomain("rubberface")}>.rubberface.eth</Dropdown.Item>
         				</DropdownButton>
   					</InputGroup>
 					<PurchaseButton provider={provider} subdomain={selectedSubdomain} domain={selectedDomain} disabled={disabled} loading={loading} account={account}></PurchaseButton>
