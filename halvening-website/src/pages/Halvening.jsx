@@ -5,14 +5,14 @@ import {DiscordCard, OneInchCard, Tokens} from '../components'
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 
+//<video id="background-video" autoPlay loop muted poster="https://i3.ytimg.com/vi/XF3miCJcTS4/maxresdefault.jpg">
+//<source src="https://cdn.discordapp.com/attachments/513191271377141773/960130356831473664/videoplayback.mp4" type="video/mp4"/>
+//</video>
 
 function Halvening() {
   return (
     <>
       <div className="App-body">
-        <video id="background-video" autoPlay loop muted poster="https://i3.ytimg.com/vi/XF3miCJcTS4/maxresdefault.jpg">
-          <source src="https://cdn.discordapp.com/attachments/513191271377141773/960130356831473664/videoplayback.mp4" type="video/mp4"/>
-        </video>
         <Tokens/>        
         <Container>
           <Row xs={1} md={2} className="g-4 justify-content-evenly" >

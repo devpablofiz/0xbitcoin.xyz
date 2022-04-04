@@ -98,5 +98,5 @@ button:focus {
   top: 0;
   bottom: 0;
   z-index: 5;
-  opacity: 0.03 !important;
+  opacity: 0.02 !important;
 }

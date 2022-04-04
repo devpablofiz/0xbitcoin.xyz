@@ -25,6 +25,7 @@ const EnsStore = ({
 
 	const giveTimeToFetch = async () =>{
 		setLoading(true)
+		checkAvailable(selectedSubdomain);
 		await delay(500)
 		setLoading(false)
 	}
