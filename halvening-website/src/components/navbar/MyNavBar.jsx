@@ -82,14 +82,15 @@ const MyNavBar = ({
             0xBitcoin
           </Link>
         </Navbar.Brand>
-        <DropdownButton align="end" variant="light" title={account ? (foundEns ? stateEnsName.name : account.substring(0,12)) : "Menu"}>
-          <Dropdown.Item onClick={!provider ? loadWeb3Modal : logoutOfWeb3Modal}>{!account ? "Connect Wallet" : "Disconnect Wallet"}</Dropdown.Item>
+        <DropdownButton align="end" variant="light" title={account ? (foundEns ? stateEnsName.name : account.substring(0,12)) : "⚙️ Menu"}>
+          <Dropdown.Item onClick={!provider ? loadWeb3Modal : logoutOfWeb3Modal}>{!account ? "🔌 Connect Wallet" : "🔌 Disconnect Wallet"}</Dropdown.Item>
           <Dropdown.Divider/>
-          <Link className='dropdown-item' to="/home">Home</Link>
-          <Link className='dropdown-item' to="/ens">Register Subdomain</Link>
-          <Link className='dropdown-item' to="/halvening">Watch The Halvening</Link>
+          <Link className='dropdown-item' to="/home">🏠 Home</Link>
+          <Link className='dropdown-item' to="/ens">🛒 Buy a Subdomain</Link>
+          <Link className='dropdown-item' to="/halvening">⛏️ Watch The Halvening</Link>
+          <Link className='dropdown-item disabled' to="/">🔜 Subdomain Marketplace</Link>
           <Dropdown.Divider />
-          <Dropdown.Item onClick={handleClick}>Toggle Theme</Dropdown.Item>
+          <Dropdown.Item onClick={handleClick}>🔄 Toggle Theme</Dropdown.Item>
         </DropdownButton>
       </Container>
     </Navbar>

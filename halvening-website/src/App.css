@@ -10,6 +10,10 @@
   pointer-events: none;
 }
 
+.a{
+  text-decoration: none;
+}
+
 .App-body {
   background-color: var(--main-bg-color);
   min-height: 100vh;
@@ -85,6 +89,11 @@ button:focus {
   background-color: var(--main-bg-color);
   color: var(--font-color);
   border-color: var(--font-color);
+}
+
+.bottom-element{
+  position: fixed;
+  bottom: 0;
 }
 
 #background-video {

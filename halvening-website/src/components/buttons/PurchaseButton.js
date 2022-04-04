@@ -183,6 +183,14 @@ const PurchaseButton = ({
 		);
 	}
 
+	if (!subdomain) {
+		return (
+			<Button variant="dark" disabled>
+				{"Use the above field to search"}
+			</Button>
+		);
+	}
+
 	return (
 		<>
 			<Button disabled = {disabled || loading || (price > bal)} variant="dark" onClick={handleShow}>

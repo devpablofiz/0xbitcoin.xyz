@@ -4,7 +4,6 @@ import {MyNavBar} from './components'
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 import ENS, { getEnsAddress } from "@ensdomains/ensjs";
-
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css' 
 import "@fontsource/titillium-web/400.css";
