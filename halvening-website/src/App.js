@@ -22,10 +22,10 @@ function App() {
 
 	const handleChainChanged = (_chainId) => {
 		// We recommend reloading the page, unless you must do otherwise
-		if (parseInt(_chainId) === 4) {
-			setChain(4);
-		} else {
+		if (parseInt(_chainId) === 1) {
 			setChain(1);
+		} else {
+			setChain(-1);
 		}
 	};
 

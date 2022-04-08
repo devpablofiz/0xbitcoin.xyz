@@ -64,7 +64,7 @@ const PurchaseButton = ({
 			return;
 		}
 		const resolverContract = new Contract(
-			addresses.rinkebyReverse,
+			addresses.reverse,
 			abis.resolver,
 			new Web3Provider(provider).getSigner(),
 		);
@@ -118,7 +118,7 @@ const PurchaseButton = ({
 		let txhash, error;
 
 		let encodedLabel = await storeContract.encodeLabel(domain);
-		let encodedData = await storeContract.encodeData(encodedLabel, subdomain, addresses.rinkebyResolver);
+		let encodedData = await storeContract.encodeData(encodedLabel, subdomain, addresses.resolver);
 		let price = await storeContract.getPrice(encodedLabel);
 
 		await xbtcContract
@@ -196,6 +196,7 @@ const PurchaseButton = ({
 			<Button disabled = {disabled || loading || (price > bal)} variant="dark" onClick={handleShow}>
 				{disabled ? "Not Available" : (((bal && price) && price > bal) ? price+" 0xBTC Required" : "Purchase")}
 			</Button>
+
 			<Button variant="dark" hidden = {(bal && price) ? (bal > price) : true} target='_blank' href="https://app.1inch.io/#/1/swap/ETH/0xBTC">Buy 0xBTC</Button> 
       		<Modal
 	  			show={show}
@@ -213,7 +214,7 @@ const PurchaseButton = ({
 					<p>{"There will be an option to set this as your primary ENS name"}</p>
 	  			</Modal.Body>
 	  			<Modal.Footer>
-					<Button variant="dark" disabled={!popupButtonEnabled} onClick={purchaseSubdomain} >Confirm</Button>
+					<Button variant="dark" disabled={!popupButtonEnabled} onClick={purchaseSubdomain} >{"Pay "+price+" 0xBTC"}</Button>
 	  			</Modal.Footer>
 			</Modal>		
 		</>

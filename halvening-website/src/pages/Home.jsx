@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import {Stack,Button} from 'react-bootstrap';
 import { Link } from "react-router-dom";
 
+
 function Home({
 	provider,
 	loadWeb3Modal,

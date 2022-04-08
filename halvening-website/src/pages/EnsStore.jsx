@@ -18,7 +18,7 @@ const EnsStore = ({
 	chain
 }) => {
 
-	const [selectedDomain, setSelectedDomain] = useState("not0xbitcoin");
+	const [selectedDomain, setSelectedDomain] = useState("0xbitcoin");
 	const [selectedSubdomain, setSelectedSubdomain] = useState("");
 	const [disabled, setDisabled] = useState(true);
 	const [loading, setLoading] = useState(false);
@@ -76,26 +76,27 @@ const EnsStore = ({
 				</Stack>
 				<div className="bottom-element mb-1">
 					<h6 className="mt-2"><a variant="dark" target='_blank' rel="noreferrer" href={"https://etherscan.io/address/"+addresses.store}> Store Contract </a></h6>
-					<h6>20% of the revenue is shared with <a target='_blank' rel="noreferrer" href='https://guild.0xbtc.io/'>The Guild</a></h6>
+					<h6>75% of the revenue is paid to <a target='_blank' rel="noreferrer" href='https://guild.0xbtc.io/'>The Guild</a> stakers</h6>
 				</div>
 			</div>
 		)
 	}
 
-	if(chain !== 4){
+	if(chain !== 1){
 		return (
 			<div className="App-body">
 				<h1 className='mt-5'>🛒🛒🛒</h1>
-				<h2>Switch to Rinkeby</h2>
-			</div>		
+				<h2>Please switch your network to Mainnet</h2>
+			</div>
 		)
 	}
 
     return (
         <div className="App-body">
-    		<h1 className='mt-5'>🛒🛒🛒</h1>
+    		<h1 className='mt-5 mb-4'>🛒🛒🛒</h1>
+			<h2>Pay once, own forever.</h2>
+			<h6>No recurring extension fees</h6>
     		<Stack direction="vertical" gap={3} className="col-md-4 mt-4 mx-auto ">
-				<h2>Purchase your own subdomain</h2>
 					<InputGroup >
   					  	<FormControl
   					  		placeholder="🔍 Search names here"
@@ -104,14 +105,15 @@ const EnsStore = ({
 							onChange={(event) => checkAvailable((event.target.value).toLowerCase())}
   					  	/>
 						<DropdownButton variant="secondary" title={"."+selectedDomain+".eth"}>
-							<Dropdown.Item onClick={() => setSelectedDomain("not0xbitcoin")}>.not0xbitcoin.eth</Dropdown.Item>
+							<Dropdown.Item onClick={() => setSelectedDomain("0xbitcoin")}>.0xbitcoin.eth</Dropdown.Item>
+							<Dropdown.Item onClick={() => setSelectedDomain("erc918")}>.erc918.eth</Dropdown.Item>
         				</DropdownButton>
   					</InputGroup>
 					<PurchaseButton provider={provider} subdomain={selectedSubdomain} domain={selectedDomain} disabled={disabled} loading={loading} account={account}></PurchaseButton>
     		</Stack>
 			<div className="bottom-element mb-1">
 				<h6 className="mt-2"><a variant="dark" target='_blank' rel="noreferrer" href={"https://etherscan.io/address/"+addresses.store}> Store Contract </a></h6>
-				<h6>20% of the revenue is shared with <a target='_blank' rel="noreferrer" href='https://guild.0xbtc.io/'>The Guild</a></h6>
+				<h6>75% of the revenue is paid to <a target='_blank' rel="noreferrer" href='https://guild.0xbtc.io/'>The Guild</a> stakers</h6>
 			</div>
         </div>
     )
