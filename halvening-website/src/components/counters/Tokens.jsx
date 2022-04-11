@@ -14,7 +14,7 @@ function addZero(i) {
 
 const Tokens = () => {
     const dataURL = "https://0xbtc.info/api/stats.json";
-    
+
     const { data, isPending, error } = useIntervalFetch(dataURL);
     const [maxSupplyInCurrentEra, setMaxSupplyInCurrentEra] = useState(null)
     const [circulatingSupply, setcirculatingSupply] = useState(null);
@@ -23,7 +23,7 @@ const Tokens = () => {
     const [lastRewardAmount, setLastRewardAmount] = useState(null);
     const [progress, setProgress] = useState(null);
     const [time, setTime] = useState("");
-    
+
     useEffect(() => {
         if (isPending || (data === null && error === null)) {
             return;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 function useFetch(url) {
     const [data, setData] = useState(null);
+    const [firstLoad,setFirstLoad] = useState(true);
     const [isPending, setIsPending] = useState(true);
     const [error, setError] = useState(null);
 
@@ -32,12 +33,18 @@ function useFetch(url) {
     }
 
     useEffect(() => {
-        const interval = setInterval(() => {
+        if(firstLoad){
             loadData();
-            console.log("fetching")
-        }, 5000)
-        return () => clearInterval(interval)    
-    })
+            setFirstLoad(false);
+        }else{
+            const interval = setInterval(() => {
+                loadData();
+                console.log("fetching")
+            }, 5000)
+    
+            return () => clearInterval(interval)    
+        }
+    },[firstLoad])
 
     return { data, isPending, error }
 }
