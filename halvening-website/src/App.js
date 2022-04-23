@@ -1,5 +1,5 @@
 import React,{ useState, useEffect} from 'react'
-import {EnsStore, Home, Halvening, NotFound} from './pages/'
+import {EnsStore, Home, Halvening, NotFound, Game} from './pages/'
 import {MyNavBar} from './components'
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import useWeb3Modal from "./hooks/useWeb3Modal";
@@ -73,6 +73,15 @@ function App() {
         <Switch>
             <Route exact path="/">
                 <Home
+                    provider={provider} 
+                    loadWeb3Modal={loadWeb3Modal}
+                    logoutOfWeb3Modal={logoutOfWeb3Modal}
+                    account={account} 
+                    chain={chain}
+                />
+            </Route>
+			<Route exact path="/game">
+                <Game
                     provider={provider} 
                     loadWeb3Modal={loadWeb3Modal}
                     logoutOfWeb3Modal={logoutOfWeb3Modal}
