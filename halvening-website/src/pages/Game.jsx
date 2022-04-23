@@ -1,6 +1,6 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import socketIOClient from "socket.io-client";
-import {Enemies} from '../components'
+import { Enemies } from '../components'
 
 import '../Game.css';
 
@@ -15,10 +15,24 @@ const directions = {
 }
 
 const keys = {
-   38: directions.up,
-   37: directions.left,
-   39: directions.right,
-   40: directions.down,
+   //arrows
+   // 38: directions.up,
+   // 37: directions.left,
+   // 39: directions.right,
+   // 40: directions.down,
+   "ArrowUp": directions.up,
+   "ArrowLeft": directions.left,
+   "ArrowRight": directions.right,
+   "ArrowDown": directions.down,
+   //wasd
+   // 87: directions.up,
+   // 65: directions.left,
+   // 68: directions.right,
+   // 83: directions.down,
+   "w": directions.up,
+   "a": directions.left,
+   "s": directions.right,
+   "d": directions.down,
 }
 
 const Game = () => {
@@ -33,56 +47,89 @@ const Game = () => {
       const socket = socketIOClient(ENDPOINT);
       setSocket(socket);
       socket.on("playerdata", data => {
-         console.log(JSON.stringify(data));
-         console.log("socket: "+JSON.stringify(socket.id));
          setSocketId(socket.id);
          setPlayerData(data);
       });
-   },[]);
+   }, []);
 
-   let held_directions = []; //State of which arrow keys we are holding down
-
-   document.onkeydown = startMovement;
-   document.onkeyup = stopMovement;
-
-   function startMovement(e) {
-      e = e || window.event;
-      socket.emit("move",e.keyCode);
+   // let held_directions = []; //State of which arrow keys we are holding down
+   let heldDirections = {
+      [directions.up]: false,
+      [directions.left]: false,
+      [directions.right]: false,
+      [directions.down]: false,
    }
+   let facingDirection = directions.down;
+   let walking = false;
 
-   function stopMovement(e) {
-      e = e || window.event;
-      socket.emit("stop",e.keyCode);
+
+   // document.onkeydown = startMovement;
+   // document.onkeyup = stopMovement;
+
+   // function startMovement(e) {
+   //    e = e || window.event;
+   //    socket.emit("move",e.keyCode);
+   // }
+
+   // function stopMovement(e) {
+   //    e = e || window.event;
+   //    socket.emit("stop",e.keyCode);
+   // }
+
+   function updateMovement(keyCode, isPressed) {
+      if (socket == null || playerdata == null) {
+         return;
+      }
+      let direction = keys[keyCode];
+      if (direction == null) {
+         return;
+      }
+      if (heldDirections[direction] === isPressed) {
+         //sono già nella situazione giusta, non c'è bisogno di inviare nulla al server
+         return;
+      } else {
+         // if (isPressed === true) {
+         //    facingDirection = direction;
+         // }
+         // walking = heldDirections[directions.up] !== heldDirections[directions.down] || heldDirections[directions.left] !== heldDirections[directions.right];
+         //devo dire al server che sono cambiati i tasti premuti
+         heldDirections[direction] = isPressed;
+         socket.emit("move", heldDirections);
+      }
    }
 
    document.addEventListener("keydown", (e) => {
-      let dir = keys[e.which];
-      if (dir && held_directions.indexOf(dir) === -1) {
-         held_directions.unshift(dir)
-      }
+      updateMovement(e.code, true);
+
+      // if (held_directions.indexOf(dir) === -1) {
+      //    held_directions.unshift(dir);
+      // }
    })
-   
+
    document.addEventListener("keyup", (e) => {
-      let dir = keys[e.which];
-      let index = held_directions.indexOf(dir);
-      if (index > -1) {
-         held_directions.splice(index, 1)
-      }
+      updateMovement(e.code, false);
+
+      // let dir = keys[e.code];
+      // let index = held_directions.indexOf(dir);
+      // if (index > -1) {
+      //    held_directions.splice(index, 1)
+      // }
    });
 
-	useEffect(() => {
-      if(!character || !map){
+   useEffect(() => {
+      if (!character || !map) {
          setCharacter(document.querySelector(".character"));
          //setNpcCharacter(document.querySelector(".npc-character"));
          setMap(document.querySelector(".map"));
       }
-      
+
       const animateMovement = () => {
-         const held_direction = held_directions[0];
-         if (held_direction) {
-            character.setAttribute("facing", held_direction);
-         }
-         character.setAttribute("walking", held_direction ? "true" : "false");
+         // character.setAttribute("facing", facingDirection);
+         // character.setAttribute("walking", walking);
+
+         // const held_direction = held_directions[0];
+         // if (held_direction) {
+         // }
       }
 
 
@@ -91,26 +138,25 @@ const Game = () => {
          animateMovement();
          window.requestAnimationFrame(() => {
             step();
-         })
+         });
       }
 
-      if(character && map){
+      if (character && map) {
          step(); //kick off the first step!
       }
 
-   },[character, map]);
-   
-   useEffect(()=>{
-      if(!character || !map){
+   }, [character, map]);
+
+   useEffect(() => {
+      if (!character || !map) {
          setCharacter(document.querySelector(".character"));
          //setNpcCharacter(document.querySelector(".npc-character"));
          setMap(document.querySelector(".map"));
       }
-      let x,y;
-      if(!playerdata){
-         
-      }else{
-         console.log(JSON.stringify(playerdata))
+      let x, y;
+      if (!playerdata) {
+
+      } else {
          x = playerdata[socketId]["xy"][0];
          y = playerdata[socketId]["xy"][1];
       }
@@ -122,38 +168,44 @@ const Game = () => {
 
          //Limits (gives the illusion of walls)
          let leftLimit = -8;
-         let rightLimit = (16 * 11)+8;
+         let rightLimit = (16 * 11) + 8;
          let topLimit = -8 + 32;
          let bottomLimit = (16 * 7);
          if (x < leftLimit) { x = leftLimit; }
          if (x > rightLimit) { x = rightLimit; }
          if (y < topLimit) { y = topLimit; }
          if (y > bottomLimit) { y = bottomLimit; }
-   
+
          let camera_left = pixelSize * 66;
          let camera_top = pixelSize * 42;
-   
-         map.style.transform = `translate3d( ${-x*pixelSize+camera_left}px, ${-y*pixelSize+camera_top}px, 0 )`;
-         character.style.transform = `translate3d( ${x*pixelSize}px, ${y*pixelSize}px, 0 )`;  
-         for (const [key,value] of Object.entries(playerdata)){
-            if(key !== socketId){
-               let [x,y] = playerdata[key];
-               let enemy = document.getElementById(key);
-               if(enemy){
-                  enemy.style.transform = `translate3d( ${x*pixelSize}px, ${y*pixelSize}px, 0 )`; 
+
+         map.style.transform = `translate3d( ${-x * pixelSize + camera_left}px, ${-y * pixelSize + camera_top}px, 0 )`;
+         character.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
+         character.setAttribute("facing", playerdata[socketId]["fd"]);
+         character.setAttribute("walking", playerdata[socketId]["wa"]);
+         for (const [currentSocketId, value] of Object.entries(playerdata)) {
+            if (currentSocketId !== socketId) {
+               let [x, y] = playerdata[currentSocketId]["xy"];
+               let facingDirection = playerdata[currentSocketId]["fd"];
+               let walking = playerdata[currentSocketId]["wa"];
+               let enemy = document.getElementById(currentSocketId);
+               if (enemy) {
+                  enemy.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
+                  enemy.setAttribute("facing", facingDirection);
+                  enemy.setAttribute("walking", walking);
                }
             }
-        }
+         }
       }
 
-      if(character && map && playerdata){
+      if (character && map && playerdata) {
          placeCharacters();
       }
 
-   },[playerdata, character, map])
+   }, [playerdata, character, map])
 
 
-   if(socketId && playerdata){
+   if (socketId && playerdata) {
       return (
          <div className="game-body">
             <div className="frame">
@@ -162,18 +214,18 @@ const Game = () => {
                <div className="corner_bottomleft"></div>
                <div className="corner_bottomright"></div>
                <div className="camera">
-                  <div className="map pixel-art">          
-                     <Enemies playerdata={playerdata} localsocket={socketId}/>    
-                     <div className="character" facing="down" walking="true">
+                  <div className="map pixel-art">
+                     <Enemies playerdata={playerdata} localsocket={socketId} />
+                     <div className="character" facing="down" walking="true" id={socketId}>
                         <div className="shadow pixel-art"></div>
                         <div className="character_spritesheet pixel-art"></div>
                      </div>
-                  </div>    
+                  </div>
                </div>
             </div>
          </div>
       )
-   }else{
+   } else {
       return (
          <div className="game-body">
             <div className="frame">
@@ -182,13 +234,13 @@ const Game = () => {
                <div className="corner_bottomleft"></div>
                <div className="corner_bottomright"></div>
                <div className="camera">
-                  <div className="map pixel-art">          
-                  </div>    
+                  <div className="map pixel-art">
+                  </div>
                </div>
             </div>
          </div>
-      )     
+      )
    }
-   
+
 };
 export default Game;
