@@ -89,7 +89,7 @@ function App() {
                     chain={chain}
               />
             </Route>
-            <Route path="/ens">
+            <Route path="/store">
                 <EnsStore 
                     provider={provider} 
                     loadWeb3Modal={loadWeb3Modal}
