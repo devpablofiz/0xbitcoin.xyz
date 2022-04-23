@@ -18,6 +18,7 @@ function Home({
       <Button variant="dark" onClick={!provider ? loadWeb3Modal : logoutOfWeb3Modal}>{!account ? "🔌 Connect Wallet 🔌" : "🔌 Disconnect Wallet 🔌"}</Button>
       <Link className='btn btn-dark' to="/store">🛒 Buy a Subdomain 🛒</Link>
       <Link className='btn btn-dark' to="/halvening">⛏️ Watch The Halvening ⛏️</Link> 
+      <Link className='btn btn-dark' to="/game">⛏️ Play ⛏️</Link> 
       <Button variant="dark" disabled>🔜 Subdomain Marketplace 🔜</Button>
     </Stack>
 			<h6 className="mb-3 mt-2 bottom-element">

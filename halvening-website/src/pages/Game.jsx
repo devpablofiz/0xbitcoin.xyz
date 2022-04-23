@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import {Stack,Button} from 'react-bootstrap';
+
 import socketIOClient from "socket.io-client";
 import { Enemies } from '../components'
 
@@ -35,22 +37,62 @@ const keys = {
    "d": directions.down,
 }
 
-const Game = () => {
+const Game = ({
+	provider,
+	loadWeb3Modal,
+	logoutOfWeb3Modal,
+	account,
+	chain,
+   ensName
+}) => {
    const [character, setCharacter] = useState(null);
    const [map, setMap] = useState(null);
 
    const [playerdata, setPlayerData] = useState(null);
    const [socketId, setSocketId] = useState(null);
    const [socket, setSocket] = useState(null);
+   const [ready, setReady] = useState(false);
+
+   const [stateEnsName, setEnsName] = useState(ensName);
+	let foundEns = null;
+
+	if (stateEnsName != null && stateEnsName.name != null) {
+		foundEns = 123;
+	}
+
+	const disconnect = async () => {
+      window.location.reload()
+	};
 
    useEffect(() => {
+		if (provider !== undefined) {
+
+			provider.on("chainChanged", disconnect);
+			provider.on("accountsChanged", disconnect);
+      }
+	}, [provider]);   
+
+	useEffect(() => {
+		if (ensName != null && ensName !== undefined && ensName != "") {
+         console.log("sisi")
+			setEnsName(ensName);
+         socket.emit("setdisplayname", ensName.name);
+		}
+	}, [ensName]);
+
+   useEffect(() => {
+      if(!account){
+         return;
+      }
       const socket = socketIOClient(ENDPOINT);
       setSocket(socket);
+      socket.emit("setdisplayname",account.substring(0,10))
       socket.on("playerdata", data => {
          setSocketId(socket.id);
          setPlayerData(data);
       });
-   }, []);
+      
+   }, [account]);
 
    // let held_directions = []; //State of which arrow keys we are holding down
    let heldDirections = {
@@ -149,7 +191,7 @@ const Game = () => {
 
    useEffect(() => {
       if (!character || !map) {
-         setCharacter(document.querySelector(".character"));
+         setCharacter(document.getElementById(socketId));
          //setNpcCharacter(document.querySelector(".npc-character"));
          setMap(document.querySelector(".map"));
       }
@@ -204,6 +246,17 @@ const Game = () => {
 
    }, [playerdata, character, map])
 
+	if(!provider){
+		return (
+			<div className="App-body">
+				<h1 className='mt-5'>🛒🛒🛒</h1>
+				<h2 className="mt-3">Connect to play</h2>
+				<Stack direction="vertical" gap={3} className="col-md-2 mt-4 mx-auto">
+					  <Button variant="dark" onClick={!provider ? loadWeb3Modal : logoutOfWeb3Modal}>{!account ? "🔌 Connect Wallet 🔌" : "Disconnect Wallet"}</Button>
+				</Stack>
+			</div>
+		)
+	}
 
    if (socketId && playerdata) {
       return (
@@ -217,6 +270,7 @@ const Game = () => {
                   <div className="map pixel-art">
                      <Enemies playerdata={playerdata} localsocket={socketId} />
                      <div className="character" facing="down" walking="true" id={socketId}>
+                        <div className="nickname">{playerdata[socketId]["nm"]}</div>
                         <div className="shadow pixel-art"></div>
                         <div className="character_spritesheet pixel-art"></div>
                      </div>

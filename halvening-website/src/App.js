@@ -80,13 +80,13 @@ function App() {
                     chain={chain}
                 />
             </Route>
-			<Route exact path="/game">
+			<Route path="/game">
                 <Game
                     provider={provider} 
                     loadWeb3Modal={loadWeb3Modal}
                     logoutOfWeb3Modal={logoutOfWeb3Modal}
                     account={account} 
-                    chain={chain}
+                    ensName={ensName}
                 />
             </Route>
             <Route path="/home">
