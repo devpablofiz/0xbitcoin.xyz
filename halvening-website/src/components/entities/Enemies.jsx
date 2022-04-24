@@ -3,10 +3,11 @@ import '../../Game.css';
 
 function renderCharacters(playerdata, localsocket) {
     let divs = [];
-    for (const [key, value] of Object.entries(playerdata)) {
+    for (const [key] of Object.entries(playerdata)) {
         if (key !== localsocket)
             divs.push(
                 <div key={key} id={key} className="character" facing="down" walking="false">
+                    <div className="msg">{playerdata[key]["msg"]}</div>
                     <div className="nickname">{playerdata[key]["nm"]}</div>
                     <div className="shadow pixel-art"></div>
                     <div className="character_spritesheet pixel-art"></div>

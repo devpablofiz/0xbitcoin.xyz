@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import {Stack,Button} from 'react-bootstrap';
 
 import socketIOClient from "socket.io-client";
-import { Enemies } from '../components'
+import { Enemies,Chat } from '../components';
 
 import '../Game.css';
+import '../App.css';
 
-const ENDPOINT = "http://localhost:4001";
+//const ENDPOINT = "http://localhost:4001";
+
+const ENDPOINT = "https://0xbitcoin.xyz:4001";
 
 /* Direction key state */
 const directions = {
@@ -51,14 +54,6 @@ const Game = ({
    const [playerdata, setPlayerData] = useState(null);
    const [socketId, setSocketId] = useState(null);
    const [socket, setSocket] = useState(null);
-   const [ready, setReady] = useState(false);
-
-   const [stateEnsName, setEnsName] = useState(ensName);
-	let foundEns = null;
-
-	if (stateEnsName != null && stateEnsName.name != null) {
-		foundEns = 123;
-	}
 
 	const disconnect = async () => {
       window.location.reload()
@@ -66,19 +61,16 @@ const Game = ({
 
    useEffect(() => {
 		if (provider !== undefined) {
-
 			provider.on("chainChanged", disconnect);
 			provider.on("accountsChanged", disconnect);
       }
 	}, [provider]);   
 
 	useEffect(() => {
-		if (ensName != null && ensName !== undefined && ensName != "") {
-         console.log("sisi")
-			setEnsName(ensName);
+		if (ensName != null && ensName.name != null && socket) {
          socket.emit("setdisplayname", ensName.name);
 		}
-	}, [ensName]);
+	}, [ensName,socket]);
 
    useEffect(() => {
       if(!account){
@@ -101,8 +93,8 @@ const Game = ({
       [directions.right]: false,
       [directions.down]: false,
    }
-   let facingDirection = directions.down;
-   let walking = false;
+   //let facingDirection = directions.down;
+   //let walking = false;
 
 
    // document.onkeydown = startMovement;
@@ -192,13 +184,10 @@ const Game = ({
    useEffect(() => {
       if (!character || !map) {
          setCharacter(document.getElementById(socketId));
-         //setNpcCharacter(document.querySelector(".npc-character"));
          setMap(document.querySelector(".map"));
       }
       let x, y;
-      if (!playerdata) {
-
-      } else {
+      if (playerdata) {
          x = playerdata[socketId]["xy"][0];
          y = playerdata[socketId]["xy"][1];
       }
@@ -225,7 +214,7 @@ const Game = ({
          character.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
          character.setAttribute("facing", playerdata[socketId]["fd"]);
          character.setAttribute("walking", playerdata[socketId]["wa"]);
-         for (const [currentSocketId, value] of Object.entries(playerdata)) {
+         for (const [currentSocketId] of Object.entries(playerdata)) {
             if (currentSocketId !== socketId) {
                let [x, y] = playerdata[currentSocketId]["xy"];
                let facingDirection = playerdata[currentSocketId]["fd"];
@@ -244,7 +233,7 @@ const Game = ({
          placeCharacters();
       }
 
-   }, [playerdata, character, map])
+   }, [playerdata, character, map, socketId])
 
 	if(!provider){
 		return (
@@ -260,23 +249,24 @@ const Game = ({
 
    if (socketId && playerdata) {
       return (
-         <div className="game-body">
-            <div className="frame">
+         <div className="App-body">
                <div className="corner_topleft"></div>
                <div className="corner_topright"></div>
                <div className="corner_bottomleft"></div>
                <div className="corner_bottomright"></div>
-               <div className="camera">
+
+               <div className="camera mt-5">
                   <div className="map pixel-art">
                      <Enemies playerdata={playerdata} localsocket={socketId} />
                      <div className="character" facing="down" walking="true" id={socketId}>
-                        <div className="nickname">{playerdata[socketId]["nm"]}</div>
+                        <div className="msg ">{playerdata[socketId]["msg"]}</div>
+                        <div className="nickname g-4">{playerdata[socketId]["nm"]}</div>
                         <div className="shadow pixel-art"></div>
                         <div className="character_spritesheet pixel-art"></div>
                      </div>
                   </div>
                </div>
-            </div>
+               <Chat socket={socket}/>
          </div>
       )
    } else {

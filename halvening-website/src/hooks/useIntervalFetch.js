@@ -44,6 +44,7 @@ function useFetch(url) {
     
             return () => clearInterval(interval)    
         }
+        //eslint-disable-next-line
     },[firstLoad])
 
     return { data, isPending, error }

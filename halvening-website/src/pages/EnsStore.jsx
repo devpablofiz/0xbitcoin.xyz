@@ -33,6 +33,7 @@ const EnsStore = ({
 		if(provider){
 			giveTimeToFetch();
 		}
+		//eslint-disable-next-line
     }, [selectedDomain, provider, selectedSubdomain]);
 
 	const checkAvailable = async (subdomain) => {

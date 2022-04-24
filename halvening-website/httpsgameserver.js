@@ -1,7 +1,15 @@
 const express = require('express');
 const app = express();
-const http = require('http');
-const server = http.createServer(app);
+const https = require('https');
+const fs = require('fs');
+
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/fullchain.pem', 'utf8');
+const server = https.createServer({
+    key: privateKey,
+    cert: certificate
+}, app);
+
 
 let playerdata = {};
 let playerHeldDirections = {};
@@ -16,7 +24,7 @@ const directions = {
 
 const io = require("socket.io")(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://www.0xbitcoin.xyz",
         methods: ["GET", "POST"]
     }
 });

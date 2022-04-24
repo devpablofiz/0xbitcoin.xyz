@@ -27,6 +27,7 @@
     "socket.io": "^4.4.1",
     "socket.io-client": "^4.4.1",
     "source-map-loader": "^3.0.1",
+    "unscroll": "^1.0.7",
     "web-vitals": "^2.1.3",
     "web3modal": "^1.9.5"
   },
