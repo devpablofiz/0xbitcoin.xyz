@@ -34,16 +34,16 @@ body {
 }
 
 .msg{
-   position: absolute;
-   border-radius: 15px;
-   color: black;
-   background: white;
    top: 4vh;
-   z-index: 1;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   word-break: break-all;
 }
 
-.nickname {
+.nickname, .msg {
    position: absolute;
+   width: 100%;
    border-radius: 15px;
    color: black;
    background: white;
