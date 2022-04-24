@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {Stack,Button} from 'react-bootstrap';
 
 import socketIOClient from "socket.io-client";
@@ -34,10 +34,46 @@ const keys = {
    // 65: directions.left,
    // 68: directions.right,
    // 83: directions.down,
-   "w": directions.up,
-   "a": directions.left,
-   "s": directions.right,
-   "d": directions.down,
+   "KeyW": directions.up,
+   "KeyA": directions.left,
+   "KeyD": directions.right,
+   "KeyS": directions.down,
+}
+
+function updateMovement(keyCode, isPressed, socket, playerdata) {
+   //console.log(keyCode+"-"+isPressed+"-"+JSON.stringify(heldDirections));
+   //console.log(socket);
+   //console.log(playerdata);
+   if (socket == null || playerdata == null) {
+      return;
+   }
+   let direction = keys[keyCode];
+   //console.log(direction+"-"+heldDirections[direction]+"-"+keyCode);
+   //console.log(direction);
+   if (direction == null) {
+      return;
+   }
+   if (heldDirections[direction] === isPressed) {
+      //sono già nella situazione giusta, non c'è bisogno di inviare nulla al server
+      return;
+   } else {
+      // if (isPressed === true) {
+      //    facingDirection = direction;
+      // }
+      // walking = heldDirections[directions.up] !== heldDirections[directions.down] || heldDirections[directions.left] !== heldDirections[directions.right];
+      //devo dire al server che sono cambiati i tasti premuti
+      heldDirections[direction] = isPressed;
+      
+      socket.emit("move", heldDirections);
+   }
+}
+
+// let held_directions = []; //State of which arrow keys we are holding down
+let heldDirections = {
+   [directions.up]: false,
+   [directions.left]: false,
+   [directions.right]: false,
+   [directions.down]: false,
 }
 
 const Game = ({
@@ -54,7 +90,8 @@ const Game = ({
    const [playerdata, setPlayerData] = useState(null);
    const [socketId, setSocketId] = useState(null);
    const [socket, setSocket] = useState(null);
-   let hasRequestedMovement = false;
+
+   const camera = useRef(null);
 
    useEffect(() => {
 		if (provider !== undefined) {
@@ -69,73 +106,36 @@ const Game = ({
 		}
 	}, [ensName,socket]);
 
+
    useEffect(() => {
       if(!account){
          return;
       }
-      const socket = socketIOClient(ENDPOINT);
-      console.log(socket);
-      setSocket(socket);
-      socket.emit("setdisplayname",account.substring(0,10))
-      socket.on("playerdata", data => {
+      const IOsocket = socketIOClient(ENDPOINT);
+      setSocket(IOsocket);
+      IOsocket.emit("setdisplayname",account.substring(0,10))
+      IOsocket.on("playerdata", data => {
          if(!socketId){
-            setSocketId(socket.id);
+            setSocketId(IOsocket.id);
          }
          setPlayerData(data);
-         console.log(playerdata);
-      });
-      document.addEventListener("keydown", (e) => {
-         console.log("keydown")
-         updateMovement(e.code, true);
-      });
-   
-      document.addEventListener("keyup", (e) => {
-         console.log("keyup")
-         updateMovement(e.code, false);
       });
    }, [account]);
 
-   // let held_directions = []; //State of which arrow keys we are holding down
-   let heldDirections = {
-      [directions.up]: false,
-      [directions.left]: false,
-      [directions.right]: false,
-      [directions.down]: false,
-   }
-
-   function updateMovement(keyCode, isPressed) {
-      console.log(keyCode+"-"+isPressed+"-"+JSON.stringify(heldDirections));
-      console.log(socket);
-      console.log(playerdata);
-      if (socket == null || playerdata == null) {
+   useEffect(()=>{
+      if(camera == null || socket == null || playerdata == null){
          return;
       }
-      let direction = keys[keyCode];
-      console.log(direction);
-      if (direction == null) {
-         return;
-      }
-      if (heldDirections[direction] === isPressed) {
-         //sono già nella situazione giusta, non c'è bisogno di inviare nulla al server
-         console.log("Already pressed");
-         return;
-      } else {
-         // if (isPressed === true) {
-         //    facingDirection = direction;
-         // }
-         // walking = heldDirections[directions.up] !== heldDirections[directions.down] || heldDirections[directions.left] !== heldDirections[directions.right];
-         //devo dire al server che sono cambiati i tasti premuti
-         heldDirections[direction] = isPressed;
-         
-         if(!hasRequestedMovement){
-            hasRequestedMovement = true;
-            socket.emit("move", heldDirections);
-            console.log("request move");
-            setTimeout(() => hasRequestedMovement = false, 100);
-         }
-
-      }
-   }
+      camera.current.addEventListener("keydown", (e) => {
+         //console.log("keydown")
+         updateMovement(e.code, true, socket, playerdata);
+      });
+   
+      camera.current.addEventListener("keyup", (e) => {
+         //console.log("keyup")
+         updateMovement(e.code, false, socket, playerdata);
+      });
+   },[camera, socket, playerdata])
 
    //let facingDirection = directions.down;
    //let walking = false;
@@ -260,7 +260,7 @@ const Game = ({
                <div className="corner_bottomleft"></div>
                <div className="corner_bottomright"></div>
 
-               <div className="camera mt-5">
+               <div id="camera" ref={camera} tabIndex="0" className="camera mt-5">
                   <div className="map pixel-art">
                      <Enemies playerdata={playerdata} localsocket={socketId} />
                      <div className="character" facing="down" walking="true" id={socketId}>
@@ -271,18 +271,18 @@ const Game = ({
                      </div>
                   </div>
                </div>
-               <Chat socket={socket}/>
+               <Chat socket={socket} camera={camera}/>
          </div>
       )
    } else {
       return (
-         <div className="game-body">
+         <div className="App-body">
             <div className="frame">
                <div className="corner_topleft"></div>
                <div className="corner_topright"></div>
                <div className="corner_bottomleft"></div>
                <div className="corner_bottomright"></div>
-               <div className="camera">
+               <div id="camera" className="camera mt-5">
                   <div className="map pixel-art">
                   </div>
                </div>

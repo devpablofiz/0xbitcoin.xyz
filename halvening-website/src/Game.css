@@ -59,6 +59,8 @@ body {
    border-radius: 25px;
    border: 2px solid;
    border-color: var(--cool-gray) !important;
+   z-index: 2;
+   outline: none;
 }
 
 .map {

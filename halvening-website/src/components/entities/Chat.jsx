@@ -1,27 +1,43 @@
-import React, { useState } from 'react'
+import React, { useRef,useEffect } from 'react'
 import '../../Game.css';
 import {Button,InputGroup,FormControl} from 'react-bootstrap';
 
-const Chat = ({socket}) => {
+const Chat = ({socket,camera}) => {
 
-    const [currentMessage,setCurrentMessage] = useState("");
+    const message = useRef(null);
 
     const send = () =>{
-        socket.emit("sendmessage",currentMessage);
+        if(message.current.value == ""){
+            return;
+        }
 
+        socket.emit("sendmessage",message.current.value);
+
+        message.current.value = "";
+        camera.current.focus();
         setTimeout(() => socket.emit("sendmessage",""), 2000);
     }
+
+    useEffect(()=>{
+        document.addEventListener("keyup", async (e) => {
+            if (e.code === "Enter") {
+                console.log("enter pressed");
+                send();
+            }
+        });
+    },[])
+
 
     return (
         <div className='chat mt-2'>
 			<InputGroup >
   			  	<FormControl
   			  		placeholder="Say something"
-					id="subdomain"
+					id="message"
 					type="text"
-					onChange={(event) => setCurrentMessage((event.target.value))}
+                    ref={message}
   			  	/>
-                <Button onClick={send}>Send</Button>
+                <Button id="send" onClick={send}>Send</Button>
   			</InputGroup>            
         </div>
     )
