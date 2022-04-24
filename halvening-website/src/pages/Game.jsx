@@ -74,6 +74,7 @@ const Game = ({
          return;
       }
       const socket = socketIOClient(ENDPOINT);
+      console.log(socket);
       setSocket(socket);
       socket.emit("setdisplayname",account.substring(0,10))
       socket.on("playerdata", data => {
@@ -81,8 +82,17 @@ const Game = ({
             setSocketId(socket.id);
          }
          setPlayerData(data);
+         console.log(playerdata);
       });
-      
+      document.addEventListener("keydown", (e) => {
+         console.log("keydown")
+         updateMovement(e.code, true);
+      });
+   
+      document.addEventListener("keyup", (e) => {
+         console.log("keyup")
+         updateMovement(e.code, false);
+      });
    }, [account]);
 
    // let held_directions = []; //State of which arrow keys we are holding down
@@ -92,34 +102,22 @@ const Game = ({
       [directions.right]: false,
       [directions.down]: false,
    }
-   //let facingDirection = directions.down;
-   //let walking = false;
-
-
-   // document.onkeydown = startMovement;
-   // document.onkeyup = stopMovement;
-
-   // function startMovement(e) {
-   //    e = e || window.event;
-   //    socket.emit("move",e.keyCode);
-   // }
-
-   // function stopMovement(e) {
-   //    e = e || window.event;
-   //    socket.emit("stop",e.keyCode);
-   // }
 
    function updateMovement(keyCode, isPressed) {
       console.log(keyCode+"-"+isPressed+"-"+JSON.stringify(heldDirections));
+      console.log(socket);
+      console.log(playerdata);
       if (socket == null || playerdata == null) {
          return;
       }
       let direction = keys[keyCode];
+      console.log(direction);
       if (direction == null) {
          return;
       }
       if (heldDirections[direction] === isPressed) {
          //sono già nella situazione giusta, non c'è bisogno di inviare nulla al server
+         console.log("Already pressed");
          return;
       } else {
          // if (isPressed === true) {
@@ -139,23 +137,23 @@ const Game = ({
       }
    }
 
-   document.addEventListener("keydown", (e) => {
-      updateMovement(e.code, true);
+   //let facingDirection = directions.down;
+   //let walking = false;
 
-      // if (held_directions.indexOf(dir) === -1) {
-      //    held_directions.unshift(dir);
-      // }
-   })
 
-   document.addEventListener("keyup", (e) => {
-      updateMovement(e.code, false);
+   // document.onkeydown = startMovement;
+   // document.onkeyup = stopMovement;
 
-      // let dir = keys[e.code];
-      // let index = held_directions.indexOf(dir);
-      // if (index > -1) {
-      //    held_directions.splice(index, 1)
-      // }
-   });
+   // function startMovement(e) {
+   //    e = e || window.event;
+   //    socket.emit("move",e.keyCode);
+   // }
+
+   // function stopMovement(e) {
+   //    e = e || window.event;
+   //    socket.emit("stop",e.keyCode);
+   // }
+
 
 //   useEffect(() => {
 //      if (!character || !map) {
