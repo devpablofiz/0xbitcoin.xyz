@@ -10,6 +10,16 @@ body {
    height: 100%;
 }
 
+   .mobile-only {
+      display: none;
+   }
+
+@media only screen and (hover: none) and (pointer: coarse) {
+   .mobile-only {
+      display: unset;
+   }
+}
+
 .game-body {
    background: var(--bg);
    display: flex;
@@ -124,6 +134,64 @@ body {
    to {
       transform: translate3d(-100%, 0%, 0);
    }
+}
+
+.dpad {
+   position: absolute;
+   right: calc(var(--pixel-size) * 2);
+   bottom: calc(var(--pixel-size) * 2);
+   width: calc(var(--pixel-size) * 37);
+   height: calc(var(--pixel-size) * 38);
+}
+
+.dpad-button {
+   appearance: none;
+   outline: 0;
+   border: 0;
+   background: transparent;
+   padding: 0;
+   cursor: pointer;
+}
+
+.dpad-button svg {
+   display: block;
+   height: calc(var(--pixel-size) * 13);
+}
+
+.dpad-button.pressed .Arrow_arrow-inset {
+   stroke: #07c2cc;
+}
+
+.dpad-button.pressed .Arrow_arrow-body {
+   stroke: #17dfea;
+}
+
+.dpad-up {
+   position: absolute;
+   left: calc(var(--pixel-size) * 12);
+   top: 0;
+}
+
+.dpad-down {
+   position: absolute;
+   bottom: var(--pixel-size);
+   left: calc(var(--pixel-size) * 12);
+}
+
+.dpad-left {
+   position: absolute;
+   top: calc(var(--pixel-size) * 12);
+   left: 0;
+}
+
+.dpad-right {
+   position: absolute;
+   top: calc(var(--pixel-size) * 12);
+   right: 0;
+}
+
+.dpad {
+   user-select: none;
 }
 
 .corner_topleft,
