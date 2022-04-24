@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Stack, Button } from 'react-bootstrap';
 
 import socketIOClient from "socket.io-client";
-import { Enemies,Chat } from '../components';
+import { Enemies, Chat } from '../components';
 
 import '../Game.css';
 import '../App.css';
@@ -21,51 +21,15 @@ const directions = {
 
 const keys = {
    //arrows
-   // 38: directions.up,
-   // 37: directions.left,
-   // 39: directions.right,
-   // 40: directions.down,
    "ArrowUp": directions.up,
    "ArrowLeft": directions.left,
    "ArrowRight": directions.right,
    "ArrowDown": directions.down,
    //wasd
-   // 87: directions.up,
-   // 65: directions.left,
-   // 68: directions.right,
-   // 83: directions.down,
    "KeyW": directions.up,
    "KeyA": directions.left,
    "KeyD": directions.right,
    "KeyS": directions.down,
-}
-
-function updateMovement(keyCode, isPressed, socket, playerdata) {
-   //console.log(keyCode+"-"+isPressed+"-"+JSON.stringify(heldDirections));
-   //console.log(socket);
-   //console.log(playerdata);
-   if (socket == null || playerdata == null) {
-      return;
-   }
-   let direction = keys[keyCode];
-   //console.log(direction+"-"+heldDirections[direction]+"-"+keyCode);
-   //console.log(direction);
-   if (direction == null) {
-      return;
-   }
-   if (heldDirections[direction] === isPressed) {
-      //sono già nella situazione giusta, non c'è bisogno di inviare nulla al server
-      return;
-   } else {
-      // if (isPressed === true) {
-      //    facingDirection = direction;
-      // }
-      // walking = heldDirections[directions.up] !== heldDirections[directions.down] || heldDirections[directions.left] !== heldDirections[directions.right];
-      //devo dire al server che sono cambiati i tasti premuti
-      heldDirections[direction] = isPressed;
-      
-      socket.emit("move", heldDirections);
-   }
 }
 
 
@@ -77,9 +41,7 @@ let defaultHeldDirections = {
    [directions.down]: false,
 }
 
-// let held_directions = []; //State of which arrow keys we are holding down
 let heldDirections = {...defaultHeldDirections};
-
 
 const Game = ({
 	provider,
@@ -97,6 +59,38 @@ const Game = ({
    const [socket, setSocket] = useState(null);
 
    const camera = useRef(null);
+
+   function handleFocusOut(){
+      heldDirections = {...defaultHeldDirections};
+      socket.emit("move",heldDirections)
+   }
+
+   function handleKeyDown(e){
+      updateMovement(e.code, true);
+   }
+
+   function handleKeyUp(e){
+      updateMovement(e.code, false);
+   }
+
+   function updateMovement(keyCode, isPressed) {
+      if (socket == null || playerdata == null) {
+         return;
+      }
+      let direction = keys[keyCode];
+      if (direction == null) {
+         return;
+      }
+      if (heldDirections[direction] === isPressed) {
+         //sono già nella situazione giusta, non c'è bisogno di inviare nulla al server
+         return;
+      } else {
+         //devo dire al server che sono cambiati i tasti premuti
+         heldDirections[direction] = isPressed;
+         
+         socket.emit("move", heldDirections);
+      }
+   }
 
    useEffect(() => {
 		if (provider !== undefined) {
@@ -126,34 +120,11 @@ const Game = ({
       });
 
       if(camera){
-         setTimeout(() => camera.current.focus(), 300);
+         setTimeout(() => camera.current.focus(), 2000);
       }
 
    }, [account]);
 
-   useEffect(()=>{
-      if(camera == null || socket == null || playerdata == null){
-         return;
-      }
-
-      camera.current.addEventListener("focusout", (e) => {
-         //console.log("keydown")
-         heldDirections = {...defaultHeldDirections};
-         socket.emit("move",heldDirections)
-      });
-
-      camera.current.addEventListener("keydown", (e) => {
-         //console.log("keydown")
-         updateMovement(e.code, true, socket, playerdata);
-      });
-   
-      camera.current.addEventListener("keyup", (e) => {
-         //console.log("keyup")
-         updateMovement(e.code, false, socket, playerdata);
-      });
-      
-   },[camera, socket, playerdata])
-   
    useEffect(() => {
       if (!character || !map) {
          setCharacter(document.getElementById(socketId));
@@ -230,7 +201,7 @@ const Game = ({
                <div className="corner_bottomleft"></div>
                <div className="corner_bottomright"></div>
 
-               <div id="camera" autoFocus ref={camera} tabIndex="0" className="camera mt-5">
+               <div onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={camera} tabIndex="0" className="camera mt-5">
                   <div className="map pixel-art">
                      <Enemies playerdata={playerdata} localsocket={socketId} />
                      <div className="character" facing="down" walking="true" id={socketId}>
@@ -239,56 +210,8 @@ const Game = ({
                         <div className="shadow pixel-art"></div>
                         <div className="character_spritesheet pixel-art"></div>
                      </div>
-               </div>
-               <div class="dpad mobile-only">
-                  <div class="DemoDirectionUI flex-center">
-                        <button class="dpad-button dpad-left">
-                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -0.5 13 13" shape-rendering="crispEdges">
-                              <path class="Arrow_outline-top"  stroke="#5f5f5f" d="M1 0h11M0 1h1M12 1h1M0 2h1M12 2h1M0 3h1M12 3h1M0 4h1M12 4h1M0 5h1M12 5h1M0 6h1M12 6h1M0 7h1M12 7h1M0 8h1M12 8h1" />
-                              <path class="Arrow_surface" stroke="#f5f5f5" d="M1 1h11M1 2h11M1 3h5M7 3h5M1 4h4M7 4h5M1 5h3M7 5h5M1 6h4M7 6h5M1 7h5M7 7h5M1 8h11" />
-                              <path class="Arrow_arrow-inset"  stroke="#434343" d="M6 3h1M5 4h1M4 5h1" />
-                              <path class="Arrow_arrow-body" stroke="#5f5f5f" d="M6 4h1M5 5h2M5 6h2M6 7h1" />
-                              <path class="Arrow_outline-bottom" stroke="#434343" d="M0 9h1M12 9h1M0 10h1M12 10h1M0 11h1M12 11h1M1 12h11" />
-                              <path class="Arrow_edge" stroke="#ffffff" d="M1 9h11" />
-                              <path class="Arrow_front" stroke="#cccccc" d="M1 10h11M1 11h11" />
-                           </svg>
-                        </button>
-                        <button class="dpad-button dpad-up">
-                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -0.5 13 13" shape-rendering="crispEdges">
-                              <path class="Arrow_outline-top"  stroke="#5f5f5f" d="M1 0h11M0 1h1M12 1h1M0 2h1M12 2h1M0 3h1M12 3h1M0 4h1M12 4h1M0 5h1M12 5h1M0 6h1M12 6h1M0 7h1M12 7h1M0 8h1M12 8h1" />
-                              <path class="Arrow_surface" stroke="#f5f5f5" d="M1 1h11M1 2h11M1 3h11M1 4h5M7 4h5M1 5h4M8 5h4M1 6h3M9 6h3M1 7h11M1 8h11" />
-                              <path class="Arrow_arrow-inset"  stroke="#434343" d="M6 4h1M5 5h1M7 5h1" />
-                              <path class="Arrow_arrow-body" stroke="#5f5f5f" d="M6 5h1M4 6h5" />
-                              <path class="Arrow_outline-bottom" stroke="#434343" d="M0 9h1M12 9h1M0 10h1M12 10h1M0 11h1M12 11h1M1 12h11" />
-                              <path class="Arrow_edge" stroke="#ffffff" d="M1 9h11" />
-                              <path class="Arrow_front" stroke="#cccccc" d="M1 10h11M1 11h11" />
-                           </svg>
-                        </button>
-                        <button class="dpad-button dpad-down">
-                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -0.5 13 13" shape-rendering="crispEdges">
-                              <path class="Arrow_outline-top" stroke="#5f5f5f" d="M1 0h11M0 1h1M12 1h1M0 2h1M12 2h1M0 3h1M12 3h1M0 4h1M12 4h1M0 5h1M12 5h1M0 6h1M12 6h1M0 7h1M12 7h1M0 8h1M12 8h1" />
-                              <path class="Arrow_surface" stroke="#f5f5f5" d="M1 1h11M1 2h11M1 3h11M1 4h3M9 4h3M1 5h4M8 5h4M1 6h5M7 6h5M1 7h11M1 8h11" />
-                              <path class="Arrow_arrow-inset" stroke="#434343" d="M4 4h5" />
-                              <path class="Arrow_arrow-body" stroke="#5f5f5f" d="M5 5h3M6 6h1" />
-                              <path class="Arrow_outline-bottom" stroke="#434343" d="M0 9h1M12 9h1M0 10h1M12 10h1M0 11h1M12 11h1M1 12h11" />
-                              <path class="Arrow_edge" stroke="#ffffff" d="M1 9h11" />
-                              <path class="Arrow_front" stroke="#cccccc" d="M1 10h11M1 11h11" />
-                           </svg>
-                        </button>
-                        <button class="dpad-button dpad-right">
-                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -0.5 13 13" shape-rendering="crispEdges">
-                              <path class="Arrow_outline-top"  stroke="#5f5f5f" d="M1 0h11M0 1h1M12 1h1M0 2h1M12 2h1M0 3h1M12 3h1M0 4h1M12 4h1M0 5h1M12 5h1M0 6h1M12 6h1M0 7h1M12 7h1M0 8h1M12 8h1" />
-                              <path class="Arrow_surface" stroke="#f5f5f5" d="M1 1h11M1 2h11M1 3h5M7 3h5M1 4h5M8 4h4M1 5h5M9 5h3M1 6h5M8 6h4M1 7h5M7 7h5M1 8h11" />
-                              <path class="Arrow_arrow-inset"  stroke="#434343" d="M6 3h1M7 4h1M8 5h1" />
-                              <path class="Arrow_arrow-body" stroke="#5f5f5f" d="M6 4h1M6 5h2M6 6h2M6 7h1" />
-                              <path class="Arrow_outline-bottom" stroke="#434343" d="M0 9h1M12 9h1M0 10h1M12 10h1M0 11h1M12 11h1M1 12h11" />
-                              <path class="Arrow_edge" stroke="#ffffff" d="M1 9h11" />
-                              <path class="Arrow_front" stroke="#cccccc" d="M1 10h11M1 11h11" />
-                           </svg>
-                     </button>
                   </div>
                </div>
-            </div>
             <Chat socket={socket} camera={camera} />
          </div>
       )
