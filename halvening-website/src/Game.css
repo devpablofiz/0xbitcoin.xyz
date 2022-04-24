@@ -2,6 +2,7 @@
    --pixel-size: 4px;
    --grid-cell: calc(var(--pixel-size) * 16);
    --bg: #9fa7e4;
+   --ticktime: 70ms;
 }
 
 html,
@@ -70,6 +71,7 @@ body {
    width: calc(13 * var(--grid-cell));
    height: calc(10 * var(--grid-cell));
    position: relative;
+   transition: transform var(--ticktime) linear
 }
 
 .character {
@@ -77,6 +79,7 @@ body {
    height: calc(var(--grid-cell)* 2);
    position: absolute;
    overflow: hidden;
+   transition: transform var(--ticktime) linear
 }
 
 .shadow {

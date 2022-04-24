@@ -7,7 +7,7 @@ const Chat = ({socket,camera}) => {
     const message = useRef(null);
 
     const send = () =>{
-        if(message.current.value == ""){
+        if(message.current.value === ""){
             return;
         }
 
@@ -35,6 +35,7 @@ const Chat = ({socket,camera}) => {
   			  		placeholder="Say something"
 					id="message"
 					type="text"
+                    maxLength={42}
                     ref={message}
   			  	/>
                 <Button id="send" onClick={send}>Send</Button>

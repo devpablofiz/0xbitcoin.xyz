@@ -7,9 +7,9 @@ import { Enemies,Chat } from '../components';
 import '../Game.css';
 import '../App.css';
 
-const ENDPOINT = "http://localhost:4001";
+//const ENDPOINT = "http://localhost:4001";
 
-//const ENDPOINT = "https://0xbitcoin.xyz:4001";
+const ENDPOINT = "https://0xbitcoin.xyz:4001";
 
 /* Direction key state */
 const directions = {
@@ -68,13 +68,18 @@ function updateMovement(keyCode, isPressed, socket, playerdata) {
    }
 }
 
-// let held_directions = []; //State of which arrow keys we are holding down
-let heldDirections = {
+
+
+let defaultHeldDirections = {
    [directions.up]: false,
    [directions.left]: false,
    [directions.right]: false,
    [directions.down]: false,
 }
+
+// let held_directions = []; //State of which arrow keys we are holding down
+let heldDirections = {...defaultHeldDirections};
+
 
 const Game = ({
 	provider,
@@ -106,7 +111,6 @@ const Game = ({
 		}
 	}, [ensName,socket]);
 
-
    useEffect(() => {
       if(!account){
          return;
@@ -120,12 +124,24 @@ const Game = ({
          }
          setPlayerData(data);
       });
+
+      if(camera){
+         setTimeout(() => camera.current.focus(), 300);
+      }
+
    }, [account]);
 
    useEffect(()=>{
       if(camera == null || socket == null || playerdata == null){
          return;
       }
+
+      camera.current.addEventListener("focusout", (e) => {
+         //console.log("keydown")
+         heldDirections = {...defaultHeldDirections};
+         socket.emit("move",heldDirections)
+      });
+
       camera.current.addEventListener("keydown", (e) => {
          //console.log("keydown")
          updateMovement(e.code, true, socket, playerdata);
@@ -136,55 +152,6 @@ const Game = ({
          updateMovement(e.code, false, socket, playerdata);
       });
    },[camera, socket, playerdata])
-
-   //let facingDirection = directions.down;
-   //let walking = false;
-
-
-   // document.onkeydown = startMovement;
-   // document.onkeyup = stopMovement;
-
-   // function startMovement(e) {
-   //    e = e || window.event;
-   //    socket.emit("move",e.keyCode);
-   // }
-
-   // function stopMovement(e) {
-   //    e = e || window.event;
-   //    socket.emit("stop",e.keyCode);
-   // }
-
-
-//   useEffect(() => {
-//      if (!character || !map) {
-//         setCharacter(document.querySelector(".character"));
-//         //setNpcCharacter(document.querySelector(".npc-character"));
-//         setMap(document.querySelector(".map"));
-//      }
-//
-//      const animateMovement = () => {
-//         // character.setAttribute("facing", facingDirection);
-//         // character.setAttribute("walking", walking);
-//
-//         // const held_direction = held_directions[0];
-//         // if (held_direction) {
-//         // }
-//      }
-//
-//
-//      //Set up the game loop
-//      const step = () => {
-//         animateMovement();
-//         window.requestAnimationFrame(() => {
-//            step();
-//         });
-//      }
-//
-//      if (character && map) {
-//         step(); //kick off the first step!
-//      }
-//
-//   }, [character, map]);
 
    useEffect(() => {
       if (!character || !map) {
@@ -217,6 +184,7 @@ const Game = ({
 
          map.style.transform = `translate3d( ${-x * pixelSize + camera_left}px, ${-y * pixelSize + camera_top}px, 0 )`;
          character.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
+         character.style.zIndex = y;
          character.setAttribute("facing", playerdata[socketId]["fd"]);
          character.setAttribute("walking", playerdata[socketId]["wa"]);
          for (const [currentSocketId] of Object.entries(playerdata)) {
@@ -227,6 +195,7 @@ const Game = ({
                let enemy = document.getElementById(currentSocketId);
                if (enemy) {
                   enemy.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
+                  enemy.style.zIndex = y;
                   enemy.setAttribute("facing", facingDirection);
                   enemy.setAttribute("walking", walking);
                }
@@ -260,12 +229,12 @@ const Game = ({
                <div className="corner_bottomleft"></div>
                <div className="corner_bottomright"></div>
 
-               <div id="camera" ref={camera} tabIndex="0" className="camera mt-5">
+               <div id="camera" autoFocus ref={camera} tabIndex="0" className="camera mt-5">
                   <div className="map pixel-art">
                      <Enemies playerdata={playerdata} localsocket={socketId} />
                      <div className="character" facing="down" walking="true" id={socketId}>
-                        <div className="msg ">{playerdata[socketId]["msg"]}</div>
-                        <div className="nickname g-4">{playerdata[socketId]["nm"]}</div>
+                        <div className="msg ">{playerdata[socketId]["msg"] ? (playerdata[socketId]["msg"]).substring(0,42) : ""}</div>
+                        <div className="nickname g-4">{playerdata[socketId]["nm"] ? (playerdata[socketId]["nm"]).substring(0,17) : ""}</div>
                         <div className="shadow pixel-art"></div>
                         <div className="character_spritesheet pixel-art"></div>
                      </div>

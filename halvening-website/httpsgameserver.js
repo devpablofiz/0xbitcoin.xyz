@@ -13,7 +13,7 @@ const server = https.createServer({
 
 let playerdata = {};
 let playerHeldDirections = {};
-let speed = 3;
+let speed = 5;
 
 const directions = {
     up: "up",
@@ -83,12 +83,18 @@ function gameLoop() {
         if (heldDirections == null) {
             continue;
         }
-        const walking = heldDirections[directions.up] != heldDirections[directions.down] || heldDirections[directions.left] != heldDirections[directions.right];
+        const walkingUD = heldDirections[directions.up] != heldDirections[directions.down];
+        const walkingLR = heldDirections[directions.left] != heldDirections[directions.right];
+        const walking = walkingUD || walkingLR;
         if (heldDirections && walking) {
-            if (heldDirections[directions.up] == true) { y -= speed; facingDirection = directions.up }
-            if (heldDirections[directions.left] == true) { x -= speed; facingDirection = directions.left }
-            if (heldDirections[directions.right] == true) { x += speed; facingDirection = directions.right }
-            if (heldDirections[directions.down] == true) { y += speed; facingDirection = directions.down }
+            if (walkingUD) {
+                if (heldDirections[directions.up] == true) { y -= speed; facingDirection = directions.up }
+                if (heldDirections[directions.down] == true) { y += speed; facingDirection = directions.down }
+            } 
+            if (walkingLR) {
+                if (heldDirections[directions.left] == true) { x -= speed; facingDirection = directions.left }
+                if (heldDirections[directions.right] == true) { x += speed; facingDirection = directions.right }
+            }
         }
 
         //Limits (gives the illusion of walls)
