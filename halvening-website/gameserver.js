@@ -136,7 +136,7 @@ function gameLoop() {
     io.emit("playerdata", playerdata);
 }
 
-const ticksPerSecond = 32.0;
+const ticksPerSecond = 20.0;
 const tickrate = (1.0 / ticksPerSecond) * 1000;
 let intervalId = setInterval(gameLoop, tickrate);
 

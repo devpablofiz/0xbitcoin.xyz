@@ -7,9 +7,9 @@ import { Enemies,Chat } from '../components';
 import '../Game.css';
 import '../App.css';
 
-//const ENDPOINT = "http://localhost:4001";
+const ENDPOINT = "http://localhost:4001";
 
-const ENDPOINT = "https://0xbitcoin.xyz:4001";
+//const ENDPOINT = "https://0xbitcoin.xyz:4001";
 
 /* Direction key state */
 const directions = {
@@ -54,15 +54,12 @@ const Game = ({
    const [playerdata, setPlayerData] = useState(null);
    const [socketId, setSocketId] = useState(null);
    const [socket, setSocket] = useState(null);
-
-	const disconnect = async () => {
-      window.location.reload()
-	};
+   let hasRequestedMovement = false;
 
    useEffect(() => {
 		if (provider !== undefined) {
-			provider.on("chainChanged", disconnect);
-			provider.on("accountsChanged", disconnect);
+			provider.on("chainChanged", logoutOfWeb3Modal);
+			provider.on("accountsChanged", logoutOfWeb3Modal);
       }
 	}, [provider]);   
 
@@ -80,7 +77,9 @@ const Game = ({
       setSocket(socket);
       socket.emit("setdisplayname",account.substring(0,10))
       socket.on("playerdata", data => {
-         setSocketId(socket.id);
+         if(!socketId){
+            setSocketId(socket.id);
+         }
          setPlayerData(data);
       });
       
@@ -111,6 +110,7 @@ const Game = ({
    // }
 
    function updateMovement(keyCode, isPressed) {
+      console.log(keyCode+"-"+isPressed+"-"+JSON.stringify(heldDirections));
       if (socket == null || playerdata == null) {
          return;
       }
@@ -128,7 +128,14 @@ const Game = ({
          // walking = heldDirections[directions.up] !== heldDirections[directions.down] || heldDirections[directions.left] !== heldDirections[directions.right];
          //devo dire al server che sono cambiati i tasti premuti
          heldDirections[direction] = isPressed;
-         socket.emit("move", heldDirections);
+         
+         if(!hasRequestedMovement){
+            hasRequestedMovement = true;
+            socket.emit("move", heldDirections);
+            console.log("request move");
+            setTimeout(() => hasRequestedMovement = false, 100);
+         }
+
       }
    }
 
@@ -150,36 +157,36 @@ const Game = ({
       // }
    });
 
-   useEffect(() => {
-      if (!character || !map) {
-         setCharacter(document.querySelector(".character"));
-         //setNpcCharacter(document.querySelector(".npc-character"));
-         setMap(document.querySelector(".map"));
-      }
-
-      const animateMovement = () => {
-         // character.setAttribute("facing", facingDirection);
-         // character.setAttribute("walking", walking);
-
-         // const held_direction = held_directions[0];
-         // if (held_direction) {
-         // }
-      }
-
-
-      //Set up the game loop
-      const step = () => {
-         animateMovement();
-         window.requestAnimationFrame(() => {
-            step();
-         });
-      }
-
-      if (character && map) {
-         step(); //kick off the first step!
-      }
-
-   }, [character, map]);
+//   useEffect(() => {
+//      if (!character || !map) {
+//         setCharacter(document.querySelector(".character"));
+//         //setNpcCharacter(document.querySelector(".npc-character"));
+//         setMap(document.querySelector(".map"));
+//      }
+//
+//      const animateMovement = () => {
+//         // character.setAttribute("facing", facingDirection);
+//         // character.setAttribute("walking", walking);
+//
+//         // const held_direction = held_directions[0];
+//         // if (held_direction) {
+//         // }
+//      }
+//
+//
+//      //Set up the game loop
+//      const step = () => {
+//         animateMovement();
+//         window.requestAnimationFrame(() => {
+//            step();
+//         });
+//      }
+//
+//      if (character && map) {
+//         step(); //kick off the first step!
+//      }
+//
+//   }, [character, map]);
 
    useEffect(() => {
       if (!character || !map) {

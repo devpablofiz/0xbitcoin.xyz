@@ -107,6 +107,15 @@ function App() {
                     chain={chain}
                 />
             </Route>
+            <Route path="/ens">
+                <EnsStore 
+                    provider={provider} 
+                    loadWeb3Modal={loadWeb3Modal}
+                    logoutOfWeb3Modal={logoutOfWeb3Modal}
+                    account={account}
+                    chain={chain}
+                />
+            </Route>            
             <Route path="/halvening">
                 <Halvening/>
             </Route>
