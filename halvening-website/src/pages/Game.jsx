@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Stack, Button } from 'react-bootstrap';
 
 import socketIOClient from "socket.io-client";
-import { Players, Chat } from '../components';
+import { Players, ChatButton, Chat } from '../components';
 
 import '../Game.css';
 import '../App.css';
@@ -52,6 +52,10 @@ const Game = ({
    ensName
 }) => {
    const [playerdata, setPlayerData] = useState(null);
+   const [chatData, setChatData] = useState(null);
+
+   const [nickName, setNickName] = useState(null)
+
    const [socketId, setSocketId] = useState(null);
    const [socket, setSocket] = useState(null);
 
@@ -94,13 +98,15 @@ const Game = ({
 		if (provider !== undefined) {
 			provider.on("accountsChanged", logoutOfWeb3Modal);
       }
+      // eslint-disable-next-line
 	}, [provider]);   
 
 	useEffect(() => {
 		if (ensName != null && ensName.name != null && socket) {
-         socket.emit("setdisplayname", ensName.name);
+         socket.emit("setdisplayname", ensName.name.split('.')[0]);
+         setNickName(ensName.name.split('.')[0]);
 		}
-	}, [ensName,socket]);
+	}, [ensName, socket]);
 
    useEffect(() => {
       if(!account){
@@ -108,7 +114,10 @@ const Game = ({
       }
       const IOsocket = socketIOClient(ENDPOINT);
       setSocket(IOsocket);
+
       IOsocket.emit("setdisplayname",account.substring(0,10))
+      setNickName(account.substring(0,10))
+
       IOsocket.on("playerdata", data => {
          if(!socketId){
             setSocketId(IOsocket.id);
@@ -116,10 +125,14 @@ const Game = ({
          setPlayerData(data);
       });
 
+      IOsocket.on("newmessage", chat => {
+         setChatData(chat)
+      })
+
       if(camera){
          setTimeout(() => camera.current.focus(), 2000);
       }
-
+   // eslint-disable-next-line   
    }, [account]);
 
    useEffect(() => {
@@ -175,17 +188,18 @@ const Game = ({
    if (socketId && playerdata) {
       return (
          <div className="App-body">
-               <div className="corner_topleft"></div>
-               <div className="corner_topright"></div>
-               <div className="corner_bottomleft"></div>
-               <div className="corner_bottomright"></div>
+            <div className="corner_topleft"></div>
+            <div className="corner_topright"></div>
+            <div className="corner_bottomleft"></div>
+            <div className="corner_bottomright"></div>
 
-               <div onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={camera} tabIndex="0" className="camera mt-5">
-                  <div className="map pixel-art" ref={map}>
-                     <Players playerdata={playerdata} localsocket={socketId} />
-                  </div>
+            <div className="camera mt-5" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={camera} tabIndex="0">
+               <div className="map pixel-art" ref={map}>
+                  <Players playerdata={playerdata} localsocket={socketId}/>
                </div>
-            <Chat socket={socket} camera={camera} />
+            </div>
+            <Chat chatData={chatData}/>
+            <ChatButton socket={socket} camera={camera} nickName={nickName}/>
          </div>
       )
    } else {

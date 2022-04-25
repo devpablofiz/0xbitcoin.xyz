@@ -1,5 +1,5 @@
 import '../../Game.css';
-import React, { useState, useEffect} from "react";
+import React from "react";
 
 const Player = ({ socketId, playerdata }) => {
 
@@ -14,7 +14,7 @@ const Player = ({ socketId, playerdata }) => {
                 <div className="shadow pixel-art"></div>
                 <div className="character_spritesheet pixel-art"></div>
             </div>
-            <div className="msg">{playerdata[socketId]["msg"] ? (playerdata[socketId]["msg"]).substring(0,42) : ""}</div>
+            <div className="msg">{playerdata[socketId]["msg"] ? (playerdata[socketId]["msg"])[1].substring(0,42) : ""}</div>
         </div>
     )
 }

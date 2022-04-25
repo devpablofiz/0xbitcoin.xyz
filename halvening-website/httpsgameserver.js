@@ -12,6 +12,7 @@ const server = https.createServer({
 
 
 let playerdata = {};
+let chatMessages = [];
 let playerHeldDirections = {};
 let speed = 5;
 
@@ -53,8 +54,16 @@ io.on("connection", (socket) => {
         playerdata[socket.id]["nm"] = nickname;
     })
 
-    socket.on("sendmessage", (msg)=>{
-        playerdata[socket.id]["msg"] = msg;
+    //send current chat when connected
+    socket.emit("newmessage", chatMessages)
+
+    socket.on("sendmessage", ([nm,msg])=>{
+        if(chatMessages.length > 16){
+            chatMessages.shift()
+        }
+        chatMessages.push([nm, msg])
+
+        io.emit("newmessage", chatMessages)
     })
 
     socket.on("move", (heldDirections) => {

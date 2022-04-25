@@ -72,12 +72,12 @@ body {
 }
 
 .nickname{
-   background: white;
+   background: rgba(255, 255, 255, .5);
    top: -70px;
 }
 
 .msg {
-   background: rgba(255, 255, 255, .75);
+   background: rgba(147, 233, 240, 0.75);
    top: -20px;
    max-width: 45ch;
    word-break: break-all;
@@ -142,9 +142,8 @@ body {
    height: calc(var(--grid-cell)* 4);
 }
 
-
 .character[facing="left"] .character_spritesheet {
-   transform: scaleX(-1) translateX(calc(var(--pixel-size)*-32));
+   transform: scaleX(-1) translateX(calc(var(--pixel-size)* -32));
    transform-origin: left;
 
    background-position-y: calc(var(--pixel-size));
