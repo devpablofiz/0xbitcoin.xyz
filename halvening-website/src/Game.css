@@ -69,11 +69,15 @@ body {
 
 .nickname, .msg {
    position: absolute;
-   width: 100%;
+   min-width: 160px;
+   width: max-content;
    border-radius: 15px;
    color: black;
    background: white;
    z-index: 1;
+   user-select: none;
+   display: flex;
+   justify-content: center;
 }
 
 .camera {
