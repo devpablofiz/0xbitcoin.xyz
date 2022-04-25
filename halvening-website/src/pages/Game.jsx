@@ -137,12 +137,13 @@ const Game = ({
             let [x, y] = playerdata[currentSocketId]["xy"];
             let facingDirection = playerdata[currentSocketId]["fd"];
             let walking = playerdata[currentSocketId]["wa"];
-            let player = document.getElementById(currentSocketId);
-            if (player) {
+            let player = document.getElementById(currentSocketId+"-player");
+            let character = document.getElementById(currentSocketId+"-character");
+            if (player && character) {
                player.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
                player.style.zIndex = y;
-               player.setAttribute("facing", facingDirection);
-               player.setAttribute("walking", walking);
+               character.setAttribute("facing", facingDirection);
+               character.setAttribute("walking", walking);
             }
          }
       }

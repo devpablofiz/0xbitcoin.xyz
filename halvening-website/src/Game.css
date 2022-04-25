@@ -104,6 +104,9 @@ body {
    height: calc(var(--grid-cell)* 2);
    position: absolute;
    overflow: hidden;
+}
+
+.player{
    transition: transform var(--ticktime) linear
 }
 
