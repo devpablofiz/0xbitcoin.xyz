@@ -8,7 +8,7 @@ const Player = ({ socketId, playerdata }) => {
     }
 
     return (
-        <div key={socketId} className='player' id={socketId}>
+        <div className='player' id={socketId}>
             <div className="nickname">{playerdata[socketId]["nm"] ? (playerdata[socketId]["nm"]).substring(0,17) : ""}</div>
             <div className="character" facing="down" walking="false">
                 <div className="shadow pixel-art"></div>

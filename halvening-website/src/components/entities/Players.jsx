@@ -6,7 +6,7 @@ function renderCharacters(playerdata) {
     let divs = [];
     for (const [key] of Object.entries(playerdata)) {
         divs.push(
-            <Player socketId={key} playerdata={playerdata}/>
+            <Player key={key} socketId={key} playerdata={playerdata}/>
         )
     }
     return divs;
