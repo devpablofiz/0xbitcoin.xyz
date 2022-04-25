@@ -1,7 +1,7 @@
 import '../../Game.css';
 import React from "react";
 
-function renderMessages(chatData) {
+function renderMessages(chatData){
     let toRender = [];
 
     for (const message of chatData) {
@@ -9,19 +9,23 @@ function renderMessages(chatData) {
             <p key={toRender.length}>{<span>{message[0] + ":"}</span>}{" " + message[1]}</p>
         )
     }
-    return toRender;
-}
-
-const Chat = ({ chatData }) => {
-    if(!chatData){
-        return null;
-    }
 
     return (
         <div className='chat'>
-            {renderMessages(chatData)}
+            {toRender}
         </div>
     )
+}
+
+const Chat = ({ chatData }) => {
+
+    if(!chatData){
+        return null;
+    }else{
+        return renderMessages(chatData);
+    }
+
+
 }
 
 export default Chat

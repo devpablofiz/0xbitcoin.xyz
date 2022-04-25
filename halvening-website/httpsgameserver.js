@@ -58,7 +58,7 @@ io.on("connection", (socket) => {
     socket.emit("newmessage", chatMessages)
 
     socket.on("sendmessage", ([nm,msg])=>{
-        if(chatMessages.length > 16){
+        if(chatMessages.length >= 16){
             chatMessages.shift()
         }
         chatMessages.push([nm, msg])

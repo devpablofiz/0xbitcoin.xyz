@@ -105,7 +105,10 @@ const Game = ({
 		if (ensName != null && ensName.name != null && socket) {
          socket.emit("setdisplayname", ensName.name.split('.')[0]);
          setNickName(ensName.name.split('.')[0]);
-		}
+		}else if(ensName != null && ensName.name == null){
+         socket.emit("setdisplayname",account.substring(0,10))
+         setNickName(account.substring(0,10))
+      }
 	}, [ensName, socket]);
 
    useEffect(() => {
@@ -114,9 +117,6 @@ const Game = ({
       }
       const IOsocket = socketIOClient(ENDPOINT);
       setSocket(IOsocket);
-
-      IOsocket.emit("setdisplayname",account.substring(0,10))
-      setNickName(account.substring(0,10))
 
       IOsocket.on("playerdata", data => {
          if(!socketId){
@@ -130,7 +130,7 @@ const Game = ({
       })
 
       if(camera){
-         setTimeout(() => camera.current.focus(), 2000);
+         setTimeout(() => camera.current.focus(), 1000);
       }
    // eslint-disable-next-line   
    }, [account]);

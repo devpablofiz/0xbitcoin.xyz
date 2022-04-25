@@ -18,13 +18,15 @@ const ChatButton = ({socket, camera, nickName}) => {
     }
 
     useEffect(()=>{
-        document.addEventListener("keyup", async (e) => {
-            if (e.code === "Enter") {
-                send();
-            }
-        });
+        if(nickName != null){
+            document.addEventListener("keyup", async (e) => {
+                if (e.code === "Enter") {
+                    send();
+                }
+            });
+        }
         // eslint-disable-next-line
-    },[])
+    },[nickName])
 
 
     return (
