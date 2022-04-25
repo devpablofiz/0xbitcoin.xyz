@@ -88,8 +88,8 @@ function gameLoop() {
         const walking = walkingUD || walkingLR;
         if (heldDirections && walking) {
             if (walkingUD) {
-                if (heldDirections[directions.up] == true) { y -= speed; facingDirection = directions.up }
-                if (heldDirections[directions.down] == true) { y += speed; facingDirection = directions.down }
+                if (heldDirections[directions.up] == true) { y -= speed; }
+                if (heldDirections[directions.down] == true) { y += speed; }
             } 
             if (walkingLR) {
                 if (heldDirections[directions.left] == true) { x -= speed; facingDirection = directions.left }

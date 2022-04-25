@@ -119,35 +119,46 @@ body {
 
 .character_spritesheet {
    position: absolute;
-   background: url("https://cdn.discordapp.com/attachments/543035740318203909/968083892202512394/dwafnbiaigo_1.png") no-repeat no-repeat;
+   background: url("https://cdn.discordapp.com/attachments/543035740318203909/968191075317596250/dwarf_new.png") no-repeat no-repeat;
    background-size: 100%;
-   width: calc(var(--grid-cell)* 8);
-   height: calc(var(--grid-cell)* 8);
+   width: calc(var(--grid-cell)* 16);
+   height: calc(var(--grid-cell)* 4);
 }
 
-.character[facing="right"] .character_spritesheet {
-   background-position-y: calc(var(--pixel-size) * -32);
-}
-
-.character[facing="up"] .character_spritesheet {
-   background-position-y: calc(var(--pixel-size) * -64);
-}
 
 .character[facing="left"] .character_spritesheet {
-   background-position-y: calc(var(--pixel-size) * -96);
+   transform: scaleX(-1) translateX(calc(var(--pixel-size)*-32));
+   transform-origin: left;
+
+   background-position-y: calc(var(--pixel-size));
 }
 
 .character[walking="true"] .character_spritesheet {
-   animation: walkAnimation 0.6s steps(4) infinite;
+   animation: walking 0.6s steps(8) infinite;
 }
 
-@keyframes walkAnimation {
+.character[walking="false"] .character_spritesheet {
+   background-position-y: calc(var(--pixel-size) * -32);
+   animation: idle 0.8s steps(5) infinite;
+}
+
+@keyframes idle {
    from {
-      transform: translate3d(0%, 0%, 0);
+      background-position-x: 0;
    }
 
    to {
-      transform: translate3d(-100%, 0%, 0);
+      background-position-x: calc(var(--pixel-size) * -160);
+   }
+}
+
+@keyframes walking {
+   from {
+      background-position-x: 0;
+   }
+
+   to {
+      background-position-x: calc(var(--pixel-size) * -256);
    }
 }
 

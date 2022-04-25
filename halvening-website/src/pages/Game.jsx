@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Stack, Button } from 'react-bootstrap';
 
 import socketIOClient from "socket.io-client";
-import { Enemies, Chat } from '../components';
+import { Players, Chat } from '../components';
 
 import '../Game.css';
 import '../App.css';
@@ -56,9 +56,7 @@ const Game = ({
    const [socket, setSocket] = useState(null);
 
    const camera = useRef(null);
-   const character = useRef(null);
    const map = useRef(null);
-
 
    function handleFocusOut(){
       heldDirections = {...defaultHeldDirections};
@@ -134,22 +132,17 @@ const Game = ({
          let camera_top = pixelSize * 42;
 
          map.current.style.transform = `translate3d( ${-x * pixelSize + camera_left}px, ${-y * pixelSize + camera_top}px, 0 )`;
-         //character.current.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
-         //character.current.style.zIndex = y;
-         //character.current.setAttribute("facing", playerdata[socketId]["fd"]);
-         //character.current.setAttribute("walking", playerdata[socketId]["wa"]);
+
          for (const [currentSocketId] of Object.entries(playerdata)) {
-            if (currentSocketId !== socketId) {
-               let [x, y] = playerdata[currentSocketId]["xy"];
-               let facingDirection = playerdata[currentSocketId]["fd"];
-               let walking = playerdata[currentSocketId]["wa"];
-               let enemy = document.getElementById(currentSocketId);
-               if (enemy) {
-                  enemy.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
-                  enemy.style.zIndex = y;
-                  enemy.setAttribute("facing", facingDirection);
-                  enemy.setAttribute("walking", walking);
-               }
+            let [x, y] = playerdata[currentSocketId]["xy"];
+            let facingDirection = playerdata[currentSocketId]["fd"];
+            let walking = playerdata[currentSocketId]["wa"];
+            let player = document.getElementById(currentSocketId);
+            if (player) {
+               player.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
+               player.style.zIndex = y;
+               player.setAttribute("facing", facingDirection);
+               player.setAttribute("walking", walking);
             }
          }
       }
@@ -160,11 +153,11 @@ const Game = ({
          y = playerdata[socketId]["xy"][1];
       }
 
-      if (character && map && playerdata && character.current && map.current) {
+      if (map && playerdata && map.current) {
          placeCharacters();
       }
 
-   }, [playerdata, character, map, socketId])
+   }, [playerdata, map, socketId])
 
 	if(!provider){
 		return (
@@ -188,13 +181,7 @@ const Game = ({
 
                <div onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={camera} tabIndex="0" className="camera mt-5">
                   <div className="map pixel-art" ref={map}>
-                     <Enemies playerdata={playerdata} localsocket={socketId} />
-                     <div className="character" facing="down" walking="true" id={socketId} ref={character}>
-                        <div className="msg ">{playerdata[socketId]["msg"] ? (playerdata[socketId]["msg"]).substring(0,42) : ""}</div>
-                        <div className="nickname g-4">{playerdata[socketId]["nm"] ? (playerdata[socketId]["nm"]).substring(0,17) : ""}</div>
-                        <div className="shadow pixel-art"></div>
-                        <div className="character_spritesheet pixel-art"></div>
-                     </div>
+                     <Players playerdata={playerdata} localsocket={socketId} />
                   </div>
                </div>
             <Chat socket={socket} camera={camera} />
