@@ -59,25 +59,28 @@ body {
    position: relative;
 }
 
-.msg{
-   top: 4vh;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   word-break: break-all;
-}
-
 .nickname, .msg {
    position: absolute;
    min-width: 160px;
    width: max-content;
    border-radius: 15px;
    color: black;
-   background: white;
+   pointer-events: none;
    z-index: 1;
    user-select: none;
-   display: flex;
-   justify-content: center;
+   padding: 0 5px;
+}
+
+.nickname{
+   background: white;
+   top: -70px;
+}
+
+.msg {
+   background: rgba(255, 255, 255, .75);
+   top: -20px;
+   max-width: 45ch;
+   word-break: break-all;
 }
 
 .camera {
@@ -111,7 +114,14 @@ body {
 }
 
 .player{
-   transition: transform var(--ticktime) linear
+   position: relative;
+   transition: transform var(--ticktime) linear;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   flex-direction: column;
+   right: calc(+50% - var(--grid-cell));
+   top: var(--grid-cell);
 }
 
 .shadow {
