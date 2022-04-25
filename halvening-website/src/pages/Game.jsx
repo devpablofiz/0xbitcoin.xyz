@@ -51,14 +51,14 @@ const Game = ({
 	chain,
    ensName
 }) => {
-   const [character, setCharacter] = useState(null);
-   const [map, setMap] = useState(null);
-
    const [playerdata, setPlayerData] = useState(null);
    const [socketId, setSocketId] = useState(null);
    const [socket, setSocket] = useState(null);
 
    const camera = useRef(null);
+   const character = useRef(null);
+   const map = useRef(null);
+
 
    function handleFocusOut(){
       heldDirections = {...defaultHeldDirections};
@@ -94,7 +94,6 @@ const Game = ({
 
    useEffect(() => {
 		if (provider !== undefined) {
-			provider.on("chainChanged", logoutOfWeb3Modal);
 			provider.on("accountsChanged", logoutOfWeb3Modal);
       }
 	}, [provider]);   
@@ -126,39 +125,19 @@ const Game = ({
    }, [account]);
 
    useEffect(() => {
-      if (!character || !map) {
-         setCharacter(document.getElementById(socketId));
-         setMap(document.querySelector(".map"));
-      }
-      let x, y;
-      if (playerdata) {
-         x = playerdata[socketId]["xy"][0];
-         y = playerdata[socketId]["xy"][1];
-      }
-
       const placeCharacters = () => {
          let pixelSize = parseInt(
             getComputedStyle(document.documentElement).getPropertyValue('--pixel-size')
          );
 
-         //Limits (gives the illusion of walls)
-         let leftLimit = -8;
-         let rightLimit = (16 * 11) + 8;
-         let topLimit = -8 + 32;
-         let bottomLimit = (16 * 7);
-         if (x < leftLimit) { x = leftLimit; }
-         if (x > rightLimit) { x = rightLimit; }
-         if (y < topLimit) { y = topLimit; }
-         if (y > bottomLimit) { y = bottomLimit; }
-
          let camera_left = pixelSize * 66;
          let camera_top = pixelSize * 42;
 
-         map.style.transform = `translate3d( ${-x * pixelSize + camera_left}px, ${-y * pixelSize + camera_top}px, 0 )`;
-         character.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
-         character.style.zIndex = y;
-         character.setAttribute("facing", playerdata[socketId]["fd"]);
-         character.setAttribute("walking", playerdata[socketId]["wa"]);
+         map.current.style.transform = `translate3d( ${-x * pixelSize + camera_left}px, ${-y * pixelSize + camera_top}px, 0 )`;
+         //character.current.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
+         //character.current.style.zIndex = y;
+         //character.current.setAttribute("facing", playerdata[socketId]["fd"]);
+         //character.current.setAttribute("walking", playerdata[socketId]["wa"]);
          for (const [currentSocketId] of Object.entries(playerdata)) {
             if (currentSocketId !== socketId) {
                let [x, y] = playerdata[currentSocketId]["xy"];
@@ -175,7 +154,13 @@ const Game = ({
          }
       }
 
-      if (character && map && playerdata) {
+      let x, y;
+      if (playerdata) {
+         x = playerdata[socketId]["xy"][0];
+         y = playerdata[socketId]["xy"][1];
+      }
+
+      if (character && map && playerdata && character.current && map.current) {
          placeCharacters();
       }
 
@@ -202,9 +187,9 @@ const Game = ({
                <div className="corner_bottomright"></div>
 
                <div onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={camera} tabIndex="0" className="camera mt-5">
-                  <div className="map pixel-art">
+                  <div className="map pixel-art" ref={map}>
                      <Enemies playerdata={playerdata} localsocket={socketId} />
-                     <div className="character" facing="down" walking="true" id={socketId}>
+                     <div className="character" facing="down" walking="true" id={socketId} ref={character}>
                         <div className="msg ">{playerdata[socketId]["msg"] ? (playerdata[socketId]["msg"]).substring(0,42) : ""}</div>
                         <div className="nickname g-4">{playerdata[socketId]["nm"] ? (playerdata[socketId]["nm"]).substring(0,17) : ""}</div>
                         <div className="shadow pixel-art"></div>
@@ -218,16 +203,7 @@ const Game = ({
    } else {
       return (
          <div className="App-body">
-            <div className="frame">
-               <div className="corner_topleft"></div>
-               <div className="corner_topright"></div>
-               <div className="corner_bottomleft"></div>
-               <div className="corner_bottomright"></div>
-               <div id="camera" className="camera mt-5">
-                  <div className="map pixel-art">
-                  </div>
-               </div>
-            </div>
+            {"Loading..."}
          </div>
       )
    }

@@ -1,8 +1,23 @@
 :root {
-   --pixel-size: 4px;
+   --pixel-size: 2px;
    --grid-cell: calc(var(--pixel-size) * 16);
    --bg: #9fa7e4;
    --ticktime: 70ms;
+}
+@media( min-width: 700px ) {
+   :root {
+      --pixel-size: 3px;
+   }
+}
+@media( min-width: 1000px ) {
+   :root {
+      --pixel-size: 4px;
+   }
+}
+@media( min-width: 1500px ) {
+   :root {
+      --pixel-size: 5px;
+   }
 }
 
 html,
@@ -104,7 +119,7 @@ body {
 
 .character_spritesheet {
    position: absolute;
-   background: url("https://assets.codepen.io/21542/DemoRpgCharacter.png") no-repeat no-repeat;
+   background: url("https://cdn.discordapp.com/attachments/543035740318203909/968083892202512394/dwafnbiaigo_1.png") no-repeat no-repeat;
    background-size: 100%;
    width: calc(var(--grid-cell)* 8);
    height: calc(var(--grid-cell)* 8);

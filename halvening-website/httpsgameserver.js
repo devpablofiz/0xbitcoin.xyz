@@ -24,7 +24,7 @@ const directions = {
 
 const io = require("socket.io")(server, {
     cors: {
-        origins: ["https://www.0xbitcoin.xyz","https://0xbitcoin.xyz","https://halvening.0xbitcoin.xyz"],
+        origins: ["https://www.0xbitcoin.xyz","https://0xbitcoin.xyz","https://halvening.0xbitcoin.xyz","188.217.53.60"],
         methods: ["GET", "POST"]
     }
 });
