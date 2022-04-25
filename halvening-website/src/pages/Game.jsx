@@ -194,11 +194,11 @@ const Game = ({
             <div className="corner_bottomright"></div>
 
             <div className="camera mt-5" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={camera} tabIndex="0">
+               <Chat chatData={chatData}/>
                <div className="map pixel-art" ref={map}>
                   <Players playerdata={playerdata} localsocket={socketId}/>
                </div>
             </div>
-            <Chat chatData={chatData}/>
             <ChatButton socket={socket} camera={camera} nickName={nickName}/>
          </div>
       )

@@ -62,7 +62,6 @@ io.on("connection", (socket) => {
             chatMessages.shift()
         }
         chatMessages.push([nm, msg])
-
         io.emit("newmessage", chatMessages)
     })
 

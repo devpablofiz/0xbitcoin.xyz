@@ -55,8 +55,13 @@ body {
    position: relative;
 }
 
-.chat{
+.chat-button{
    position: relative;
+}
+
+.chat{
+   position: absolute;
+   z-index: 1;
 }
 
 .nickname, .msg {
