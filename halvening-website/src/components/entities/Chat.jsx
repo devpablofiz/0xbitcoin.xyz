@@ -6,7 +6,7 @@ function renderMessages(chatData) {
 
     for (const message of chatData) {
         toRender.push(
-            <p key={toRender.length}>{message[0]+": "+message[1]}</p>
+            <p key={toRender.length}>{<span>{message[0] + ":"}</span>}{" " + message[1]}</p>
         )
     }
     return toRender;
