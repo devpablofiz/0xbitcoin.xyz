@@ -24,7 +24,7 @@ const controls = {
    openChat: "openChat"
 }
 
-const keys = {
+const directionKeys = {
    //arrows
    "ArrowUp": directions.up,
    "ArrowLeft": directions.left,
@@ -94,8 +94,8 @@ const Game = ({
       }
    }
 
-   function handleCommands(command) {
-      if (command === controls.openChat) {
+   function handleCommands(command, isPressed) {
+      if (command === controls.openChat && isPressed === false) {
          chat.current.focus()
       }
    }
@@ -104,31 +104,26 @@ const Game = ({
       if (socket == null || playerdata == null) {
          return;
       }
-      let direction = keys[keyCode];
+      let direction = directionKeys[keyCode];
+      let command = otherKeys[keyCode];
 
-      //se non è una direzione
-      if (direction == null) {
-         let command = otherKeys[keyCode];
-         //se non è un'altro comando
-         if (command == null) {
+      if (direction != null) {
+         if (heldKeys[direction] === isPressed) {
+            //sono già nella situazione giusta, non c'è bisogno di inviare nulla al server
             return;
+         } else {
+            //devo dire al server che sono cambiati i tasti premuti
+            heldKeys[direction] = isPressed;
+            socket.emit("move", heldKeys);
          }
 
+      } else if (command != null) {
          if (heldKeys[command] === isPressed) {
             return;
          } else {
             heldKeys[command] = isPressed;
-            handleCommands(command);
+            handleCommands(command, isPressed);
          }
-      }
-
-      if (heldKeys[direction] === isPressed) {
-         //sono già nella situazione giusta, non c'è bisogno di inviare nulla al server
-         return;
-      } else {
-         //devo dire al server che sono cambiati i tasti premuti
-         heldKeys[direction] = isPressed;
-         socket.emit("move", heldKeys);
       }
    }
 

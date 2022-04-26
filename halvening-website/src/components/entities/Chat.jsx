@@ -3,7 +3,7 @@ import React, { forwardRef } from "react";
 import { renderMessages } from '../../utils';
 import { ChatButton } from '../../components'
 
-const Chat = forwardRef((props, ref) => {
+const Chat = forwardRef((props, chatRef) => {
 
     if (!props.chatData) {
         return null;
@@ -15,7 +15,7 @@ const Chat = forwardRef((props, ref) => {
                         {renderMessages(props.chatData)}
                     </div>
                 </div>
-                <ChatButton ref={ref} {...props} />
+                <ChatButton ref={chatRef} {...props} />
             </div>
         );
     }
