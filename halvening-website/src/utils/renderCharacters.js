@@ -1,4 +1,4 @@
-import {Player} from '../components'
+import { Player } from '../components'
 
 const renderCharacters = (playerdata) => {
     let divs = [];

@@ -3,6 +3,7 @@ import { Stack, Button } from 'react-bootstrap';
 
 import socketIOClient from "socket.io-client";
 import { Players, Chat } from '../components';
+import {randomFourDigit} from '../utils'
 
 import '../Game.css';
 import '../App.css';
@@ -53,10 +54,12 @@ const Game = ({
    const [playerdata, setPlayerData] = useState(null);
    const [chatData, setChatData] = useState(null);
 
-   const [nickName, setNickName] = useState(null)
+   const [nickName, setNickName] = useState(null);
 
    const [socketId, setSocketId] = useState(null);
    const [socket, setSocket] = useState(null);
+
+   const [isGuest, setIsGuest] = useState(false);
 
    const camera = useRef(null);
    const map = useRef(null);
@@ -106,12 +109,14 @@ const Game = ({
          setNickName(ensName.name.split('.')[0]);
 		}else if(ensName != null && ensName.name == null){
          socket.emit("setdisplayname",account.substring(0,10))
-         setNickName(account.substring(0,10))
+         setNickName(account.substring(0,10));
+      }else if(isGuest){
+         socket.emit("setdisplayname",nickName);
       }
 	}, [ensName, socket]);
 
    useEffect(() => {
-      if(!account){
+      if(!account && !isGuest){
          return;
       }
       const IOsocket = socketIOClient(ENDPOINT);
@@ -132,7 +137,7 @@ const Game = ({
          setTimeout(() => camera.current.focus(), 1000);
       }
    // eslint-disable-next-line   
-   }, [account]);
+   }, [account, isGuest]);
 
    useEffect(() => {
       const placeCharacters = () => {
@@ -172,14 +177,15 @@ const Game = ({
 
    }, [playerdata, map, socketId])
 
-	if(!provider){
+	if(!provider && !nickName){
 		return (
 			<div className="App-body">
 				<h1 className='mt-5'>🛒🛒🛒</h1>
 				<h2 className="mt-3">Connect to play</h2>
 				<Stack direction="vertical" gap={3} className="col-md-2 mt-4 mx-auto">
-					  <Button variant="dark" onClick={!provider ? loadWeb3Modal : logoutOfWeb3Modal}>{!account ? "🔌 Connect Wallet 🔌" : "Disconnect Wallet"}</Button>
-				</Stack>
+					  <Button variant="dark" onClick={loadWeb3Modal}>{"🔌 Connect Wallet 🔌"}</Button>
+                 <Button variant="dark" onClick={() => {setNickName("guest-"+randomFourDigit()); setIsGuest(true)}}>{"Play as Guest"}</Button>
+            </Stack>
 			</div>
 		)
 	}
