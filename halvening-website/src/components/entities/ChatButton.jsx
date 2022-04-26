@@ -1,24 +1,23 @@
-import React, { useRef,useEffect } from 'react'
+import React, { useEffect, forwardRef } from 'react'
 import '../../Game.css';
 import {InputGroup,FormControl} from 'react-bootstrap';
 
-const ChatButton = ({socket, camera, nickName}) => {
-
-    const message = useRef(null);
+const ChatButton = forwardRef((props, ref) => {
 
     const send = () =>{
-        if(message.current.value === ""){
+        if(ref.current.value === ""){
+            props.camera.current.focus();
             return;
         }
 
-        socket.emit("sendmessage",[nickName,message.current.value]);
+        props.socket.emit("sendmessage",[props.nickName, ref.current.value]);
 
-        message.current.value = "";
-        camera.current.focus();
+        ref.current.value = "";
+        props.camera.current.focus();
     }
 
     useEffect(()=>{
-        if(nickName != null){
+        if(props.nickName != null){
             document.addEventListener("keyup", async (e) => {
                 if (e.code === "Enter") {
                     send();
@@ -26,22 +25,21 @@ const ChatButton = ({socket, camera, nickName}) => {
             });
         }
         // eslint-disable-next-line
-    },[nickName])
-
+    },[props.nickName])
 
     return (
-        <div className='chat-button mt-2'>
+        <div className='chat-button mt-2'  >
 			<InputGroup >
   			  	<FormControl
   			  		placeholder="Say something"
 					id="message"
 					type="text"
                     maxLength={64}
-                    ref={message}
+                    ref={ref}
   			  	/>
   			</InputGroup>            
         </div>
     )
-}
+})
 
 export default ChatButton

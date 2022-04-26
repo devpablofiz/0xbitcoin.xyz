@@ -83,7 +83,7 @@ io.on("connection", (socket) => {
 
     socket.on("move", (heldDirections) => {
         playerHeldDirections[socket.id] = heldDirections;
-        console.log(socket.id+" requested movement");
+        //console.log(socket.id+" requested movement");
     });
 
     socket.on("disconnect", () => {
@@ -97,7 +97,9 @@ io.on("connection", (socket) => {
 server.listen(4001, () => {
     console.log('listening on *:4001');
 });
+
 let debugPrint = 0;
+
 function gameLoop() {
     for (const [currentSocketId, value] of Object.entries(playerdata)) {
         let [x, y] = playerdata[currentSocketId]["xy"];

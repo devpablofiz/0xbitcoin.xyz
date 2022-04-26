@@ -1,22 +1,22 @@
 import '../../Game.css';
-import React from "react";
+import React, { forwardRef } from "react";
 import {renderMessages} from '../../utils';
 import {ChatButton} from '../../components'
 
-const Chat = ({ chatData, socket, camera, nickName }) => {
+const Chat = forwardRef((props, ref) => {
 
-    if(!chatData){
+    if(!props.chatData){
         return null;
     }else{
         return (
             <div className='chat'>
-                <ChatButton socket={socket} camera={camera} nickName={nickName}/>
+                <ChatButton ref={ref} {...props}/>
                 <div>
-                    {renderMessages(chatData)}
+                    {renderMessages(props.chatData)}
                 </div>
             </div>
         );
     }
-}
+})
 
 export default Chat

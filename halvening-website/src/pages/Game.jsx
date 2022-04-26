@@ -20,12 +20,17 @@ const directions = {
    right: "right"
 }
 
+const controls = {
+   openChat: "openChat"
+}
+
 const keys = {
    //arrows
    "ArrowUp": directions.up,
    "ArrowLeft": directions.left,
    "ArrowRight": directions.right,
    "ArrowDown": directions.down,
+
    //wasd
    "KeyW": directions.up,
    "KeyA": directions.left,
@@ -33,15 +38,21 @@ const keys = {
    "KeyS": directions.down,
 }
 
+const otherKeys ={
+   //chat controls
+   "KeyT": controls.openChat
+}
 
-let defaultHeldDirections = {
+
+let defaultHeldKeys = {
    [directions.up]: false,
    [directions.left]: false,
    [directions.right]: false,
    [directions.down]: false,
+   [controls.openChat] : false
 }
 
-let heldDirections = {...defaultHeldDirections};
+let heldKeys = {...defaultHeldKeys};
 
 const Game = ({
 	provider,
@@ -63,18 +74,27 @@ const Game = ({
 
    const camera = useRef(null);
    const map = useRef(null);
+   const chat = useRef(null);
 
    function handleFocusOut(){
-      heldDirections = {...defaultHeldDirections};
-      socket.emit("move",heldDirections)
+      heldKeys = {...defaultHeldKeys};
+      socket.emit("move",heldKeys)
    }
 
    function handleKeyDown(e){
+      e.preventDefault();
       updateMovement(e.code, true);
    }
 
    function handleKeyUp(e){
+      e.preventDefault();
       updateMovement(e.code, false);
+   }
+
+   function handleCommands(command){
+      if(command === controls.openChat){
+         chat.current.focus()
+      }
    }
 
    function updateMovement(keyCode, isPressed) {
@@ -82,17 +102,33 @@ const Game = ({
          return;
       }
       let direction = keys[keyCode];
+
+      //se non è una direzione
       if (direction == null) {
-         return;
+         let command = otherKeys[keyCode];
+         //se non è un'altro comando
+         if(command == null){
+            return;
+         }
+
+         if(heldKeys[command] === isPressed){
+            return;
+         }else{
+            heldKeys[command] = isPressed;
+
+            handleCommands(command);
+         }
+
       }
-      if (heldDirections[direction] === isPressed) {
+
+      if (heldKeys[direction] === isPressed) {
          //sono già nella situazione giusta, non c'è bisogno di inviare nulla al server
          return;
       } else {
          //devo dire al server che sono cambiati i tasti premuti
-         heldDirections[direction] = isPressed;
+         heldKeys[direction] = isPressed;
          
-         socket.emit("move", heldDirections);
+         socket.emit("move", heldKeys);
       }
    }
 
@@ -198,7 +234,7 @@ const Game = ({
             <div className="corner_bottomleft"></div>
             <div className="corner_bottomright"></div>
 
-            <Chat chatData={chatData} socket={socket} camera={camera} nickName={nickName}/>
+            <Chat chatData={chatData} socket={socket} camera={camera} nickName={nickName} ref={chat}/>
 
             <div className="camera mt-5" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={camera} tabIndex="0">
                <div className="map pixel-art" ref={map}>
