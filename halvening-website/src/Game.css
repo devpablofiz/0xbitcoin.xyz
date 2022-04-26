@@ -175,7 +175,7 @@ body {
 
 .map {
    image-rendering: pixelated;
-   background-image: url("https://cdn.discordapp.com/attachments/543035740318203909/968621735857496095/new_map.png");
+   background-image: url("https://cdn.discordapp.com/attachments/543035740318203909/968630004395175946/new_map.png");
    background-size: 100%;
    width: calc(13 * var(--grid-cell));
    height: calc(10 * var(--grid-cell));
