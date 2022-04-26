@@ -153,13 +153,6 @@ body {
    top: -70px;
 }
 
-.msg {
-   background: rgba(147, 233, 240, 0.75);
-   top: -20px;
-   max-width: 45ch;
-   word-break: break-all;
-}
-
 .camera {
    width: calc(var(--pixel-size) * 160);
    height: calc(var(--pixel-size) * 144);
@@ -173,9 +166,36 @@ body {
    outline: none;
 }
 
+.msg {
+   background: rgba(147, 233, 240, 0.75);
+   top: -20px;
+   max-width: 45ch;
+   word-break: break-all;
+	position: relative;
+	max-width: 30em;
+	padding: 1.125em 1.5em;
+	font-size: 1.25em;
+	border-radius: 1rem;
+   box-shadow:	0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
+}
+
+.msg::before {
+	content: '';
+	position: absolute;
+	width: 0;
+	height: 0;
+	bottom: 100%;
+	left: 1.5em;
+	border: .75rem solid transparent;
+	border-top: none;
+
+	border-bottom-color: #fff;
+	filter: drop-shadow(0 -0.0625rem 0.0625rem rgba(0, 0, 0, .1));
+}
+
 .map {
    image-rendering: pixelated;
-   background-image: url("https://assets.codepen.io/21542/CameraDemoMap.png");
+   background-image: url("https://cdn.discordapp.com/attachments/543035740318203909/968621735857496095/new_map.png");
    background-size: 100%;
    width: calc(13 * var(--grid-cell));
    height: calc(10 * var(--grid-cell));
@@ -191,20 +211,19 @@ body {
 }
 
 .bar{
-   background: #f00;
+   background: rgba(255, 48, 48, 0.5);
    width: 100%;
    height: 100%;
    position: absolute;
    top: 0;
    z-index: -1;
    transition: width .5s linear;
-   border: solid 5px rgba(255, 255, 255);;
    border-radius: 15px;
 }
 
 .rock {
-   width: calc(var(--grid-cell)* 2);
-   height: calc(var(--grid-cell)* 2);
+   width: calc(var(--grid-cell)* 3);
+   height: calc(var(--grid-cell)* 3);
    position: absolute;
    overflow: hidden;
 }
