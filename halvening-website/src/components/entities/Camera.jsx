@@ -105,7 +105,7 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
             }
             setPlayerData(data);
         });
-        socket.on("rockData", data => {
+        socket.on("rockdata", data => {
             if (!socketId) {
                setSocketId(socket.id);
             }

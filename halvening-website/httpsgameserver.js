@@ -12,7 +12,7 @@ const server = https.createServer({
 
 
 let playerdata = {};
-let rockData = { 1:{'xy':[100,40]}};
+let rockData = { 1:{'xy':[100,40]}, 2:{'xy':[109,80]}};
 
 let chatMessages = [];
 let playerHeldDirections = {};
@@ -67,6 +67,7 @@ io.on("connection", (socket) => {
 
     //send current chat when connected
     socket.emit("newmessage", chatMessages)
+    socket.emit("rockdata", rockData);
 
     socket.on("sendmessage", ([nm,msg])=>{
         if(msg.length > 64){
@@ -145,7 +146,6 @@ function gameLoop() {
     }
     debugPrint++
     io.emit("playerdata", playerdata);
-    io.emit("rockData", rockData);
 }
 
 const ticksPerSecond = 20.0;
