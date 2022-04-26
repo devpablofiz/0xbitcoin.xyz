@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Stack, Button } from 'react-bootstrap';
 
 import socketIOClient from "socket.io-client";
-import { Players, Chat } from '../components';
+import { Players, Chat, Rocks } from '../components';
 import { randomFourDigit } from '../utils'
 
 import '../Game.css';
@@ -63,6 +63,7 @@ const Game = ({
    ensName
 }) => {
    const [playerdata, setPlayerData] = useState(null);
+   const [rockData, setRockData] = useState(null);
    const [chatData, setChatData] = useState(null);
 
    const [nickName, setNickName] = useState(null);
@@ -159,6 +160,13 @@ const Game = ({
          setPlayerData(data);
       });
 
+      IOsocket.on("rockData", data => {
+         if (!socketId) {
+            setSocketId(IOsocket.id);
+         }
+         setRockData(data);
+      });
+
       IOsocket.on("newmessage", chat => {
          setChatData(chat)
       })
@@ -168,6 +176,28 @@ const Game = ({
       }
 
    }, [account, isGuest]);
+
+   useEffect(() => {
+      const placeRocks = () => {
+         let pixelSize = parseInt(
+            getComputedStyle(document.documentElement).getPropertyValue('--pixel-size')
+         );
+
+         for (const [rockId] of Object.entries(rockData)) {
+            let [x, y] = rockData[rockId]["xy"];
+            let rock = document.getElementById(rockId + "-rock");
+            if (rock) {
+               rock.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
+               rock.style.zIndex = y;
+            }
+         }
+      }
+
+      if (rockData) {
+         placeRocks();
+      }
+
+   }, [rockData, socketId])
 
    useEffect(() => {
       const placeCharacters = () => {
@@ -232,6 +262,7 @@ const Game = ({
                <Chat chatData={chatData} socket={socket} camera={camera} nickName={nickName} ref={chat} />
                <div className="map pixel-art" ref={map}>
                   <Players playerdata={playerdata} localsocket={socketId} />
+                  <Rocks rockData={rockData} />
                </div>
             </div>
          </div>

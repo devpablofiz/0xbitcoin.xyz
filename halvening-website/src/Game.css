@@ -202,6 +202,13 @@ body {
    border-radius: 15px;
 }
 
+.rock {
+   width: calc(var(--grid-cell)* 2);
+   height: calc(var(--grid-cell)* 2);
+   position: absolute;
+   overflow: hidden;
+}
+
 .player{
    position: relative;
    transition: transform var(--ticktime) linear;
@@ -230,6 +237,15 @@ body {
    width: calc(var(--grid-cell)* 16);
    height: calc(var(--grid-cell)* 4);
 }
+
+.rock_spritesheet {
+   position: absolute;
+   background: url("https://cdn.discordapp.com/attachments/543035740318203909/968574144906149938/rock.png") no-repeat no-repeat;
+   background-size: 100%;
+   width: calc(var(--grid-cell)* 2);
+   height: calc(var(--grid-cell)* 2);
+}
+
 
 .character[facing="left"] .character_spritesheet {
    transform: scaleX(-1) translateX(calc(var(--pixel-size)* -32));

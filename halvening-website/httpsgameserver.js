@@ -12,6 +12,8 @@ const server = https.createServer({
 
 
 let playerdata = {};
+let rockData = { 1:{'xy':[100,40]}};
+
 let chatMessages = [];
 let playerHeldDirections = {};
 let speed = 5;
@@ -143,6 +145,7 @@ function gameLoop() {
     }
     debugPrint++
     io.emit("playerdata", playerdata);
+    io.emit("rockData", rockData);
 }
 
 const ticksPerSecond = 20.0;
