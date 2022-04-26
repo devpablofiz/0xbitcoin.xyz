@@ -12,7 +12,9 @@ function renderMessages(chatData){
 
     return (
         <div className='chat'>
+            <div>
             {toRender}
+            </div>
         </div>
     )
 }

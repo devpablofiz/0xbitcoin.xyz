@@ -60,36 +60,61 @@ body {
 }
 
 .chat{
-   height: 25%;
-   display: flex;
-   flex-direction: column;
-   justify-content: center;
-   align-items: flex-start;
+   z-index: 1;
+   position: absolute;
    color: black;
-   width: 50%;
+   min-height: 0;
+   max-height: 250px;
    bottom: 0;
    left: 0;
-   position: absolute;
-   z-index: 1;
-   overflow-y: scroll;
+   width: 50%;
+   flex: 1 1 auto;
+   display: flex;
+   flex-direction: column-reverse;
+   overflow-y: auto;
+   overflow-x: hidden;
+   align-items: flex-start;
    margin-bottom: 10px;
+}
+
+.chat > div {
+   width: 100%;
 }
 
 .chat:hover{
    background: rgba(255, 255, 255, .5);
-   border-radius: 0 15px 0 0;
+   border-radius: 0 5px 0 0;
 }
 
-.chat:hover::-webkit-scrollbar-track{
-   background: #f00;
+/* width */
+.chat:hover::-webkit-scrollbar {
+   display: unset;
+   width: 8px;
 }
 
-.chat > p{
+/* Track */
+.chat:hover::-webkit-scrollbar-track {
+   background: transparent;
+}
+
+/* Handle */
+.chat:hover::-webkit-scrollbar-thumb {
+   background: rgba(255, 255, 255, .75);
+   border-radius: 5px;
+}
+
+/* Handle on hover */
+.chat:hover:-webkit-scrollbar-thumb:hover {
+   background: rgb(255,255,255);
+   border-radius: 5px;
+}
+
+.chat p{
    width: 100%;
    text-align: left;
    margin: 2px;
    padding: 0 4px;
-   
+   word-break: break-all;
 }
 
 .chat span{
