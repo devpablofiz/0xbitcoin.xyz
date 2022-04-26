@@ -153,12 +153,15 @@ body {
    top: -70px;
 }
 
+.container-game{
+   position: relative;
+}
+
 .camera {
    width: calc(var(--pixel-size) * 160);
    height: calc(var(--pixel-size) * 144);
    overflow: hidden;
    background: #61ddf7;
-   position: relative;
    border-radius: 5px;
    border: 2px solid;
    border-color: var(--cool-gray) !important;

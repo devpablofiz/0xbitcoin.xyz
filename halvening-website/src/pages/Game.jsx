@@ -87,7 +87,7 @@ const Game = ({
             <div className="corner_topright"></div>
             <div className="corner_bottomleft"></div>
             <div className="corner_bottomright"></div>
-            <div id="container-game">
+            <div className="container-game">
                <Camera socket={socket} focusChat={focusChat} ref={cameraRef} />
                <Chat socket={socket} chatData={chatData} nickName={nickName} focusCamera={focusCamera} ref={chatRef} />
             </div>
