@@ -6,7 +6,7 @@ const ChatButton = forwardRef((props, ref) => {
 
     const send = () =>{
         if(ref.current.value === ""){
-            props.camera.current.focus();
+            
             return;
         }
 

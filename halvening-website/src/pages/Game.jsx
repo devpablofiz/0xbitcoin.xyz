@@ -40,7 +40,7 @@ const keys = {
 
 const otherKeys ={
    //chat controls
-   "KeyT": controls.openChat
+   "Enter": controls.openChat
 }
 
 
@@ -82,13 +82,16 @@ const Game = ({
    }
 
    function handleKeyDown(e){
-      e.preventDefault();
-      updateMovement(e.code, true);
+      if(chat.current !== document.activeElement){
+         updateControls(e.code, true);
+      }
+      
    }
 
    function handleKeyUp(e){
-      e.preventDefault();
-      updateMovement(e.code, false);
+      if(chat.current !== document.activeElement){
+         updateControls(e.code, false);
+      }
    }
 
    function handleCommands(command){
@@ -97,7 +100,7 @@ const Game = ({
       }
    }
 
-   function updateMovement(keyCode, isPressed) {
+   function updateControls(keyCode, isPressed) {
       if (socket == null || playerdata == null) {
          return;
       }
@@ -115,7 +118,6 @@ const Game = ({
             return;
          }else{
             heldKeys[command] = isPressed;
-
             handleCommands(command);
          }
 
@@ -233,7 +235,6 @@ const Game = ({
             <div className="corner_topright"></div>
             <div className="corner_bottomleft"></div>
             <div className="corner_bottomright"></div>
-
 
             <div className="camera mt-5" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={camera} tabIndex="0">
                <Chat chatData={chatData} socket={socket} camera={camera} nickName={nickName} ref={chat}/>
