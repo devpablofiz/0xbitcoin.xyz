@@ -107,13 +107,13 @@ const Game = ({
 		if (ensName != null && ensName.name != null && socket) {
          socket.emit("setdisplayname", ensName.name.split('.')[0]);
          setNickName(ensName.name.split('.')[0]);
-		}else if(ensName != null && ensName.name == null){
+		}else if(ensName != null && ensName.name == null && socket){
          socket.emit("setdisplayname",account.substring(0,10))
          setNickName(account.substring(0,10));
-      }else if(isGuest){
+      }else if(isGuest && socket){
          socket.emit("setdisplayname",nickName);
       }
-	}, [ensName, socket]);
+	}, [ensName, socket, account, isGuest, nickName]);
 
    useEffect(() => {
       if(!account && !isGuest){
