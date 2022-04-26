@@ -16,6 +16,15 @@ let chatMessages = [];
 let playerHeldDirections = {};
 let speed = 5;
 
+const handleMessage = (socket, msg) => {
+    playerdata[socket]["msg"] = msg;
+    setTimeout(() => {
+        if(playerdata[socket]["msg"] === msg){
+            playerdata[socket]["msg"] = "";
+        }
+    }, 2000);
+}
+
 const directions = {
     up: "up",
     down: "down",
@@ -58,17 +67,23 @@ io.on("connection", (socket) => {
     socket.emit("newmessage", chatMessages)
 
     socket.on("sendmessage", ([nm,msg])=>{
+        if(msg.length > 64){
+            console.log(socket.id+"sent a very long message")
+            return
+        }
+
         if(chatMessages.length >= 16){
             chatMessages.shift()
         }
+
         chatMessages.push([nm, msg])
+        handleMessage(socket.id,msg);
         io.emit("newmessage", chatMessages)
     })
 
     socket.on("move", (heldDirections) => {
         playerHeldDirections[socket.id] = heldDirections;
         console.log(socket.id+" requested movement");
-        
     });
 
     socket.on("disconnect", () => {

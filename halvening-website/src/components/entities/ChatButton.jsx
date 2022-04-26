@@ -36,7 +36,7 @@ const ChatButton = ({socket, camera, nickName}) => {
   			  		placeholder="Say something"
 					id="message"
 					type="text"
-                    maxLength={42}
+                    maxLength={64}
                     ref={message}
   			  	/>
   			</InputGroup>            
