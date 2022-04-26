@@ -171,26 +171,6 @@ body {
    top: -20px;
    max-width: 45ch;
    word-break: break-all;
-	position: relative;
-	max-width: 30em;
-	padding: 1.125em 1.5em;
-	font-size: 1.25em;
-	border-radius: 1rem;
-   box-shadow:	0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
-}
-
-.msg::before {
-	content: '';
-	position: absolute;
-	width: 0;
-	height: 0;
-	bottom: 100%;
-	left: 1.5em;
-	border: .75rem solid transparent;
-	border-top: none;
-
-	border-bottom-color: #fff;
-	filter: drop-shadow(0 -0.0625rem 0.0625rem rgba(0, 0, 0, .1));
 }
 
 .map {
