@@ -55,20 +55,38 @@ body {
    position: relative;
 }
 
+.chat-container {
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   width: 25%;
+   min-width: 400px;
+   z-index: 1;
+}
+
+@media screen and (max-device-width: 400px) {
+   .chat-container {
+      min-width: 0;
+      width: 100%;
+   }
+}
+
 .chat-button{
    position: relative;
+
+}
+
+.chat-button input{
+   border-radius: 0 0 5px 0;
 }
 
 .chat{
    z-index: 1;
-   position: absolute;
    color: black;
    min-height: 0;
    max-height: 100px;
    max-width: 500px;
-   bottom: 0;
-   left: 0;
-   width: 50%;
+   width: 100%;
    flex: 1 1 auto;
    display: flex;
    flex-direction: column-reverse;
@@ -144,7 +162,7 @@ body {
    overflow: hidden;
    background: #61ddf7;
    position: relative;
-   border-radius: 25px;
+   border-radius: 5px;
    border: 2px solid;
    border-color: var(--cool-gray) !important;
    z-index: 2;

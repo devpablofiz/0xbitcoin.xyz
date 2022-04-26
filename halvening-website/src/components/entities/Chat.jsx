@@ -9,11 +9,13 @@ const Chat = forwardRef((props, ref) => {
         return null;
     }else{
         return (
-            <div className='chat'>
-                <ChatButton ref={ref} {...props}/>
-                <div>
-                    {renderMessages(props.chatData)}
+             <div className='chat-container'>
+                <div className='chat'>
+                    <div>
+                        {renderMessages(props.chatData)}
+                    </div>
                 </div>
+                <ChatButton ref={ref} {...props}/>
             </div>
         );
     }

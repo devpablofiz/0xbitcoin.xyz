@@ -28,7 +28,7 @@ const ChatButton = forwardRef((props, ref) => {
     },[props.nickName])
 
     return (
-        <div className='chat-button mt-2'  >
+        <div className='chat-button'  >
 			<InputGroup >
   			  	<FormControl
   			  		placeholder="Say something"

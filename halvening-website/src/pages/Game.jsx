@@ -234,9 +234,9 @@ const Game = ({
             <div className="corner_bottomleft"></div>
             <div className="corner_bottomright"></div>
 
-            <Chat chatData={chatData} socket={socket} camera={camera} nickName={nickName} ref={chat}/>
 
             <div className="camera mt-5" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={camera} tabIndex="0">
+               <Chat chatData={chatData} socket={socket} camera={camera} nickName={nickName} ref={chat}/>
                <div className="map pixel-art" ref={map}>
                   <Players playerdata={playerdata} localsocket={socketId}/>
                </div>
