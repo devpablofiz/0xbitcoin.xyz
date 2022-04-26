@@ -80,6 +80,11 @@ body {
    border-radius: 0 0 5px 0;
 }
 
+.chat-button .form-control:focus{
+   border-color: transparent;
+   box-shadow: none ;
+}
+
 .chat{
    z-index: 1;
    color: black;
