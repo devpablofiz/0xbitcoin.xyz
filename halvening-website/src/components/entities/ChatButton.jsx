@@ -1,6 +1,6 @@
 import React, { useRef,useEffect } from 'react'
 import '../../Game.css';
-import {Button,InputGroup,FormControl} from 'react-bootstrap';
+import {InputGroup,FormControl} from 'react-bootstrap';
 
 const ChatButton = ({socket, camera, nickName}) => {
 
@@ -39,7 +39,6 @@ const ChatButton = ({socket, camera, nickName}) => {
                     maxLength={42}
                     ref={message}
   			  	/>
-                <Button id="send" onClick={send}>Send</Button>
   			</InputGroup>            
         </div>
     )

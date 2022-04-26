@@ -1,5 +1,6 @@
 import '../../Game.css';
 import React from "react";
+import { stc } from '../../utils';
 
 const Player = ({ socketId, playerdata }) => {
 
