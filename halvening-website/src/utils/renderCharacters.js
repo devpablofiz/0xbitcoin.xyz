@@ -1,11 +1,11 @@
 import { Player } from '../components'
 
-const renderCharacters = (playerdata) => {
+const renderCharacters = (playerData) => {
     let divs = [];
 
-    for (const [key] of Object.entries(playerdata)) {
+    for (const [key] of Object.entries(playerData)) {
         divs.push(
-            <Player key={key} socketId={key} playerdata={playerdata}/>
+            <Player key={key} socketId={key} playerData={playerData}/>
         )
     }
     

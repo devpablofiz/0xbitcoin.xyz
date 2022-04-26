@@ -11,7 +11,7 @@ const ChatButton = forwardRef((props, chatRef) => {
         }
 
         function unFocusChat() {
-            props.camera.current.focus();
+            props.focusCamera();
         }
 
         function send() {
@@ -31,7 +31,7 @@ const ChatButton = forwardRef((props, chatRef) => {
                 }
             });
         }
-    }, [props.nickName, chatRef, props.camera, props.socket])
+    }, [props.nickName, chatRef, props.socket])
 
     return (
         <div className='chat-button' >
@@ -46,4 +46,4 @@ const ChatButton = forwardRef((props, chatRef) => {
     )
 })
 
-export default ChatButton
+export default ChatButton;

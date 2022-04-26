@@ -2,10 +2,10 @@ import React from 'react'
 import '../../Game.css';
 import { renderCharacters } from '../../utils';
 
-const Players = ({ playerdata }) => {
+const Players = ({ playerData }) => {
     return (
         <>
-            {renderCharacters(playerdata)}
+            {playerData ? renderCharacters(playerData) : <></>}
         </>
     )
 }

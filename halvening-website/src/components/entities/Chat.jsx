@@ -4,7 +4,6 @@ import { renderMessages } from '../../utils';
 import { ChatButton } from '../../components'
 
 const Chat = forwardRef((props, chatRef) => {
-
     if (!props.chatData) {
         return null;
     } else {
@@ -21,4 +20,4 @@ const Chat = forwardRef((props, chatRef) => {
     }
 })
 
-export default Chat
+export default Chat;
