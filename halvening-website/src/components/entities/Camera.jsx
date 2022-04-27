@@ -151,9 +151,10 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
 
     useEffect(() => {
         const placeCharacters = () => {
+            let player = document.getElementById(socketId + "-character");
 
-            let camera_left = pixelSize * 66;
-            let camera_top = pixelSize * 42;
+            let camera_left = (cameraRef.current.clientWidth / 2) - player.clientWidth/2;
+            let camera_top = (cameraRef.current.clientHeight / 2) - player.clientHeight;
 
             mapRef.current.style.transform = `translate3d( ${-x * pixelSize + camera_left}px, ${-y * pixelSize + camera_top}px, 0 )`;
 
