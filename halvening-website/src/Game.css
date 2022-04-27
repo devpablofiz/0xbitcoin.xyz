@@ -5,6 +5,7 @@
    --ticktime: 70ms;
 }
 
+
 @font-face {
    font-family: Minecraft;
    src: url("./fonts/PixeloidSansBold-RpeJo.ttf");
@@ -24,11 +25,6 @@
    :root {
       --pixel-size: 5px;
    }
-}
-
-html,
-body {
-   height: 100%;
 }
 
 .mobile-only {

@@ -2,7 +2,6 @@ import React,{ useState, useEffect} from 'react'
 import '../../App.css';
 import {Navbar,Container, DropdownButton, Dropdown} from 'react-bootstrap'
 import { Link } from "react-router-dom";
-import unscroll from "unscroll"
 
 const MyNavBar = ({
 	provider,
@@ -51,7 +50,6 @@ const MyNavBar = ({
 
   useEffect(() => {
     let localTheme = localStorage.getItem("theme");
-    unscroll('#root > nav')
     //first time loading?
     if(localTheme !== "dark" && localTheme !== "white"){
       localStorage.setItem("theme","dark");

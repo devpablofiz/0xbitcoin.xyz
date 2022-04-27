@@ -186,7 +186,7 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
 
 
     return (
-        <div className="camera mt-5" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={cameraRef} tabIndex="0">
+        <div className="camera" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={cameraRef} tabIndex="0">
             <div className="map pixel-art" ref={mapRef}>
                 <Players playerData={playerData} localsocket={socketId} />
                 <Rocks rockData={rockData} />
