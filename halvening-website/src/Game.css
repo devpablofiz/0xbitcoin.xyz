@@ -68,12 +68,14 @@ body {
    width: 25%;
    min-width: 400px;
    z-index: 1;
+
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1000px) {
    .chat-container {
       min-width: 0;
       width: 100%;
+      transform: scale(.5) translate(-50%, 50%);
    }
 }
 
