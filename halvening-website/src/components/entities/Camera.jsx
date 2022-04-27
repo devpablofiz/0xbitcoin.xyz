@@ -1,4 +1,4 @@
-import { Players, Rocks } from '../../components';
+import { Players, Rocks, Dpad } from '../../components';
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 
 //possible actions
@@ -73,6 +73,7 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
     }
 
     function updateControls(keyCode, isPressed) {
+        console.log(keyCode)
         if (socket == null || playerData == null) {
             return;
         }
@@ -190,6 +191,7 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
                 <Players playerData={playerData} localsocket={socketId} />
                 <Rocks rockData={rockData} />
             </div>
+            <Dpad updateControls={updateControls}/>
         </div>
     );
 

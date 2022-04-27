@@ -300,6 +300,9 @@ body {
    height: calc(var(--pixel-size) * 38);
 }
 
+.dpad-button.pressed .Arrow_arrow-inset { stroke:#07c2cc; }
+.dpad-button.pressed .Arrow_arrow-body { stroke:#17dfea; }
+
 .dpad-button {
    appearance: none;
    outline: 0;
