@@ -1,8 +1,16 @@
 import React, { useEffect, forwardRef } from 'react'
 import '../../Game.css';
-import { FormControl } from 'react-bootstrap';
+import { Button, FormControl,InputGroup } from 'react-bootstrap';
 
 const ChatButton = forwardRef((props, chatRef) => {
+
+    function sendMsg() {
+        if (chatRef.current.value.trim() !== "") {
+            props.socket.emit("sendmessage", [props.nickName, chatRef.current.value]);
+        }
+        chatRef.current.value = ""
+        props.focusCamera();
+    }
 
     useEffect(() => {
 
@@ -35,13 +43,16 @@ const ChatButton = forwardRef((props, chatRef) => {
 
     return (
         <div className='chat-button' >
-            <FormControl
-                placeholder="Say something"
-                id="message"
-                type="text"
-                maxLength={64}
-                ref={chatRef}
-            />
+            <InputGroup>
+                <FormControl
+                    placeholder="Say something"
+                    id="message"
+                    type="text"
+                    maxLength={64}
+                    ref={chatRef}
+                />
+                <Button className="mobile-only" onClick={sendMsg}> Send </Button>
+            </InputGroup>
         </div>
     )
 })
