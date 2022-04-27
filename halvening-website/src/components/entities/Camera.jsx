@@ -49,6 +49,7 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
     const [playerData, setPlayerData] = useState(null);
     const [rockData, setRockData] = useState(null);
     const [socketId, setSocketId] = useState(null);
+    const [pixelSize, setPixelSize] = useState(null);
 
     const mapRef = useRef(null);
 
@@ -99,18 +100,27 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
     }
 
     useEffect(() => {
+        const handleResize = () => {
+            setPixelSize(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pixel-size')))
+        }
+        
         socket.on("playerdata", data => {
             if (!socketId) {
                 setSocketId(socket.id);
             }
             setPlayerData(data);
         });
+        
         socket.on("rockdata", data => {
             if (!socketId) {
-               setSocketId(socket.id);
+                setSocketId(socket.id);
             }
             setRockData(data);
-         });
+        });
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
     }, [socket])
 
     useEffect(() => {
@@ -121,31 +131,25 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
 
     useEffect(() => {
         const placeRocks = () => {
-           let pixelSize = parseInt(
-              getComputedStyle(document.documentElement).getPropertyValue('--pixel-size')
-           );
-  
-           for (const [rockId] of Object.entries(rockData)) {
-              let [x, y] = rockData[rockId]["xy"];
-              let rock = document.getElementById(rockId + "-rock");
-              if (rock) {
-                 rock.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
-                 rock.style.zIndex = y;
-              }
-           }
+            console.log("placerocks"+pixelSize);
+            for (const [rockId] of Object.entries(rockData)) {
+                let [x, y] = rockData[rockId]["xy"];
+                let rock = document.getElementById(rockId + "-rock");
+                if (rock) {
+                    rock.style.transform = `translate3d( ${x * pixelSize}px, ${y * pixelSize}px, 0 )`;
+                    rock.style.zIndex = y;
+                }
+            }
         }
-  
-        if (rockData) {
-           placeRocks();
+
+        if (rockData && pixelSize) {
+            placeRocks();
         }
-  
-     }, [rockData, socketId])
+
+    }, [rockData, socketId, pixelSize])
 
     useEffect(() => {
         const placeCharacters = () => {
-            let pixelSize = parseInt(
-                getComputedStyle(document.documentElement).getPropertyValue('--pixel-size')
-            );
 
             let camera_left = pixelSize * 66;
             let camera_top = pixelSize * 42;
@@ -173,11 +177,11 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
             y = playerData[socketId]["xy"][1];
         }
 
-        if (mapRef && playerData && mapRef.current) {
+        if (mapRef && playerData && mapRef.current && pixelSize) {
             placeCharacters();
         }
 
-    }, [playerData, mapRef, socketId])
+    }, [playerData, mapRef, socketId, pixelSize])
 
 
     return (
