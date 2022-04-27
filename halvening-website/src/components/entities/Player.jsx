@@ -1,5 +1,6 @@
 import '../../Game.css';
 import React from "react";
+import {stc} from "../../utils"
 
 const Player = ({ socketId, playerData }) => {
 
@@ -9,7 +10,7 @@ const Player = ({ socketId, playerData }) => {
 
     return (
         <div className='player' id={socketId+"-player"}>
-            <div className="nickname">{playerData[socketId]["nm"] ? (playerData[socketId]["nm"]).substring(0, 17) : ""}
+            <div className="nickname" style={{color: '#'+stc(playerData[socketId]["nm"])}} >{playerData[socketId]["nm"] ? (playerData[socketId]["nm"]).substring(0, 17) : ""}
                 <div className='bar'></div>
             </div>
             <div className="character" facing="down" walking="false" id={socketId+"-character"}>
