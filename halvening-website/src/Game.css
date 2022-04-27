@@ -114,6 +114,10 @@ body {
    width: 100%;
 }
 
+.chat p > span{
+   text-shadow: 1px 1px black;
+}
+
 /* width */
 .chat:hover::-webkit-scrollbar {
    display: unset;
@@ -158,6 +162,7 @@ body {
 
 .nickname{
    background: rgba(255, 255, 255, .5);
+   text-shadow: 1px 2px black;
    top: -70px;
 }
 
