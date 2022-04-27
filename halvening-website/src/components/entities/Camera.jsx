@@ -73,7 +73,6 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
     }
 
     function updateControls(keyCode, isPressed) {
-        console.log(keyCode)
         if (socket == null || playerData == null) {
             return;
         }
@@ -106,14 +105,14 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
         }
         
         socket.on("playerdata", data => {
-            if (!socketId) {
+            if (socketId != socket.id) {
                 setSocketId(socket.id);
             }
             setPlayerData(data);
         });
 
         socket.on("rockdata", data => {
-            if (!socketId) {
+            if (socketId != socket.id) {
                 setSocketId(socket.id);
             }
             setRockData(data);
@@ -132,7 +131,6 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
 
     useEffect(() => {
         const placeRocks = () => {
-            console.log("placerocks"+pixelSize);
             for (const [rockId] of Object.entries(rockData)) {
                 let [x, y] = rockData[rockId]["xy"];
                 let rock = document.getElementById(rockId + "-rock");
@@ -151,6 +149,8 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
 
     useEffect(() => {
         const placeCharacters = () => {
+            let x = playerData[socketId]["xy"][0];
+            let y = playerData[socketId]["xy"][1];
             let player = document.getElementById(socketId + "-character");
 
             let camera_left = (cameraRef.current.clientWidth / 2) - player.clientWidth/2;
@@ -172,19 +172,12 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
                 }
             }
         }
-
-        let x, y;
-        if (playerData) {
-            x = playerData[socketId]["xy"][0];
-            y = playerData[socketId]["xy"][1];
-        }
-
-        if (mapRef && playerData && mapRef.current && pixelSize) {
+        
+        if (mapRef && playerData && playerData[socketId] && mapRef.current && pixelSize) {
             placeCharacters();
         }
 
     }, [playerData, mapRef, socketId, pixelSize])
-
 
     return (
         <div className="camera" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={cameraRef} tabIndex="0">

@@ -55,21 +55,36 @@ const Game = ({
    }, [ensName, socket, account, isGuest, nickName]);
 
    useEffect(() => {
+
       if (!account && !isGuest) {
          return;
       }
-      const IOsocket = socketIOClient(ENDPOINT);
+
+      if(account){
+         setIsGuest(false);
+      }
+
+      const IOsocket = socketIOClient(ENDPOINT,{
+         //options
+      });
+
       setSocket(IOsocket);
 
       IOsocket.on("newmessage", chat => {
          setChatData(chat)
       })
 
+      //cleanup
+      return () => {
+         IOsocket.disconnect()
+      }
+
    }, [account, isGuest]);
+
 
    if (!provider && !nickName) {
       return (
-         <div className="App-body">
+         <div className="Game-body">
             <h1 className='mt-5'>🛒🛒🛒</h1>
             <h2 className="mt-3">Connect to play</h2>
             <Stack direction="vertical" gap={3} className="col-md-2 mt-4 mx-auto">
@@ -82,7 +97,7 @@ const Game = ({
 
    if (socket) {
       return (
-         <div className="App-body">
+         <div className="Game-body">
             <div className="container-game">
                <Camera socket={socket} focusChat={focusChat} ref={cameraRef} />
                <Chat socket={socket} chatData={chatData} nickName={nickName} focusCamera={focusCamera} ref={chatRef} />
@@ -91,7 +106,7 @@ const Game = ({
       )
    } else {
       return (
-         <div className="App-body">
+         <div className="Game-body">
             {"Loading..."}
          </div>
       )

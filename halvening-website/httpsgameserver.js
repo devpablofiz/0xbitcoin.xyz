@@ -13,6 +13,7 @@ const server = https.createServer({
 
 let playerdata = {};
 let rockData = { 1:{'xy':[100,40]}, 2:{'xy':[109,80]}};
+let needsUpdating = [];
 
 let chatMessages = [];
 let playerHeldDirections = {};
@@ -86,7 +87,7 @@ io.on("connection", (socket) => {
 
     socket.on("move", (heldDirections) => {
         playerHeldDirections[socket.id] = heldDirections;
-        //console.log(socket.id+" requested movement");
+        needsUpdating.push[socket.id];
     });
 
     socket.on("disconnect", () => {
