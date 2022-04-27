@@ -4,6 +4,12 @@
    --bg: #9fa7e4;
    --ticktime: 70ms;
 }
+
+@font-face {
+   font-family: Minecraft;
+   src: url("./fonts/PixeloidSansBold-RpeJo.ttf");
+}
+
 @media( min-width: 700px ) {
    :root {
       --pixel-size: 3px;
@@ -155,6 +161,7 @@ body {
 
 .container-game{
    position: relative;
+   font-family: Minecrat !important;
 }
 
 .camera {
