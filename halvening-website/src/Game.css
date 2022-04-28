@@ -187,6 +187,7 @@
 
 .map {
    image-rendering: pixelated;
+   filter: blur(0);
    background-image: url("https://cdn.discordapp.com/attachments/543035740318203909/969020669855666237/new_map-export.png");
    background-size: 100%;
    width: calc(20 * var(--grid-cell));
@@ -232,6 +233,7 @@
 }
 
 .shadow {
+   filter: blur(0);
    width: calc(var(--grid-cell)* 2);
    height: calc(var(--grid-cell)* 2);
    position: absolute;
@@ -242,6 +244,7 @@
 }
 
 .character_spritesheet {
+   filter: blur(0);
    position: absolute;
    background: url("https://cdn.discordapp.com/attachments/543035740318203909/968191075317596250/dwarf_new.png") no-repeat no-repeat;
    background-size: 100%;
@@ -250,6 +253,7 @@
 }
 
 .rock_spritesheet {
+   filter: blur(0);
    position: absolute;
    background: url("https://cdn.discordapp.com/attachments/543035740318203909/969020827901251625/rock_1.png") no-repeat no-repeat;
    background-size: 100%;
