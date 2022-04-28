@@ -3,7 +3,6 @@ import '../../Game.css';
 import { renderRocks } from '../../utils';
 
 const Rocks = ({ rockData }) => {
-
     if(!rockData){
         return null
     }

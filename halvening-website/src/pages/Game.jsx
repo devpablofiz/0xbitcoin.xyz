@@ -20,6 +20,7 @@ const Game = ({
    chain,
    ensName
 }) => {
+
    const [chatData, setChatData] = useState(null);
    const [nickName, setNickName] = useState(null);
    const [socket, setSocket] = useState(null);

@@ -45,7 +45,6 @@ let heldKeys = { ...defaultHeldKeys };
 
 
 const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
-
     const [playerData, setPlayerData] = useState(null);
     const [rockData, setRockData] = useState(null);
     const [socketId, setSocketId] = useState(null);
@@ -100,19 +99,21 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
     }
 
     useEffect(() => {
+        console.log("rerender camera");
+
         const handleResize = () => {
             setPixelSize(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pixel-size')))
         }
         
         socket.on("playerdata", data => {
-            if (socketId != socket.id) {
+            if (socketId !== socket.id) {
                 setSocketId(socket.id);
             }
             setPlayerData(data);
         });
 
         socket.on("rockdata", data => {
-            if (socketId != socket.id) {
+            if (socketId !== socket.id) {
                 setSocketId(socket.id);
             }
             setRockData(data);
@@ -148,6 +149,7 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
     }, [rockData, socketId, pixelSize])
 
     useEffect(() => {
+        
         const placeCharacters = () => {
             let x = playerData[socketId]["xy"][0];
             let y = playerData[socketId]["xy"][1];
