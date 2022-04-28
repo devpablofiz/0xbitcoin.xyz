@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const https = require('https');
 const fs = require('fs');
+const Filter = require('bad-words');
 
 const privateKey = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/privkey.pem', 'utf8');
 const certificate = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/fullchain.pem', 'utf8');
@@ -12,17 +13,24 @@ const server = https.createServer({
 
 
 let playerdata = {};
+let needsUpdating = {}
 let rockData = { 1:{'xy':[100,40]}, 2:{'xy':[109,80]}};
-
+let filter = new Filter();
 let chatMessages = [];
 let playerHeldDirections = {};
 let speed = 5;
 
 const handleMessage = (socket, msg) => {
     playerdata[socket]["msg"] = msg;
+    if(!needsUpdating[socket.id]){
+        needsUpdating[socket.id] = true;
+    }
     setTimeout(() => {
         if(playerdata[socket]["msg"] === msg){
             playerdata[socket]["msg"] = "";
+            if(!needsUpdating[socket.id]){
+                needsUpdating[socket.id] = true;
+            }
         }
     }, 2000);
 }
@@ -49,6 +57,7 @@ io.on("connection", (socket) => {
     console.log("New client connected: " + socket.id);
 
     playerdata[socket.id] = {};
+    
     playerdata[socket.id]["xy"] = [90, 34];
     playerdata[socket.id]["fd"] = directions.down;
     playerdata[socket.id]["wa"] = false;
@@ -61,13 +70,21 @@ io.on("connection", (socket) => {
     }
     playerHeldDirections[socket.id] = heldDirections;
 
-    socket.on("setdisplayname", (nickname)=>{
-        playerdata[socket.id]["nm"] = nickname;
-    })
-
-    //send current chat when connected
     socket.emit("newmessage", chatMessages)
     socket.emit("rockdata", rockData);
+    socket.emit("playerdata", playerdata);
+
+    if(!needsUpdating[socket.id]){
+        needsUpdating[socket.id] = true;
+    }
+
+    socket.on("setdisplayname", (nickname)=>{
+        playerdata[socket.id]["nm"] = nickname;
+        
+        if(!needsUpdating[socket.id]){
+            needsUpdating[socket.id] = true;
+        }
+    })
 
     socket.on("sendmessage", ([nm,msg])=>{
         if(msg.length > 64){
@@ -79,20 +96,26 @@ io.on("connection", (socket) => {
             chatMessages.shift()
         }
 
-        chatMessages.push([nm, msg])
-        handleMessage(socket.id,msg);
+        let message = filter.clean(msg)
+        chatMessages.push([nm, message])
+        handleMessage(socket.id, message);
         io.emit("newmessage", chatMessages)
     })
 
     socket.on("move", (heldDirections) => {
         playerHeldDirections[socket.id] = heldDirections;
+        if(!needsUpdating[socket.id]){
+            needsUpdating[socket.id] = true;
+        }
+        
         //console.log(socket.id+" requested movement");
     });
 
     socket.on("disconnect", () => {
         delete playerdata[socket.id];
         delete playerHeldDirections[socket.id];
-        // io.emit("playerdata", playerdata);
+        delete needsUpdating[socket.id]
+        io.emit("playerdata", playerdata);
         console.log("Client disconnected: " + socket.id);
     });
 });
@@ -111,6 +134,7 @@ function gameLoop() {
         if (heldDirections == null) {
             continue;
         }
+        
         const walkingUD = heldDirections[directions.up] != heldDirections[directions.down];
         const walkingLR = heldDirections[directions.left] != heldDirections[directions.right];
         const walking = walkingUD || walkingLR;
@@ -140,12 +164,24 @@ function gameLoop() {
         playerdata[currentSocketId]["fd"] = facingDirection;
         playerdata[currentSocketId]["wa"] = walking;
     }
+
     if(debugPrint > ticksPerSecond*10){
         console.log(playerdata);
+        io.emit("playerdata", playerdata);
         debugPrint = 0;
     }
-    debugPrint++
-    io.emit("playerdata", playerdata);
+
+    if(Object.keys(needsUpdating).length > 0){
+        let toUpdate = {}
+        for(const [socketID] of Object.entries(needsUpdating)){
+            toUpdate[socketID] = playerdata[socketID];
+            needsUpdating[socketID] = false;
+        }
+
+        io.emit("playerdataupdate", toUpdate)
+    }
+
+    debugPrint++;
 }
 
 const ticksPerSecond = 20.0;
