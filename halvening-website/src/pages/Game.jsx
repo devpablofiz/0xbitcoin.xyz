@@ -41,12 +41,6 @@ const Game = ({
       cameraRef.current.focus();
    }
 
-   useEffect(() => {
-      if (provider !== undefined) {
-         provider.on("accountsChanged", logoutOfWeb3Modal);
-      }
-   }, [provider]);
-
    useEffect(()=>{
       let IOsocket;
       const authenticate = async (msg, address) => {
