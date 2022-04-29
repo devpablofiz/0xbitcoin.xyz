@@ -242,8 +242,14 @@ io.on("connection", (socket) => {
     const playerShape = planck.Box(mapGridSize / 2, mapGridSize / 2); //created with half extents
     //body fixiture initialization
     const playerCollisionGroupIndex = -1; //all fixitures of bodies that are in the same negative group wont collide
+    const rockCollisionGroupIndex = -2; //all fixitures of bodies that are in the same negative group wont collide
+
     const playerCollisionCategoryBits = 0x0002; //category of collision
+    const rockCollisionCategoryBits = 0x0004; //category of collision
+
     const playerCollisionMaskBits = 0xFFFF ^ playerCollisionCategoryBits; //categories to collide with (all except players themselves)
+    const rockCollisionMaskBits = 0xFFFF ^ rockCollisionCategoryBits; //categories to collide with (all except rock themselves)
+
     const playerFixiture = playerBody.createFixture({ //non importa salvare playerFixiture
         shape: playerShape,
         density: 0, //density of the body, used with mass data to calculate weight, with 0 density behaves like it has 0 mass
@@ -302,12 +308,12 @@ server.listen(4001, () => {
 let debugPrint = 0;
 
 function gameLoop() {
-    for (const [currentSocketId, value] of Object.entries(playerdata)) {
-        let oldData = JSON.stringify(playerdata[currentSocketId]);
-
-        let [x, y] = playerdata[currentSocketId]["xy"];
-        let facingDirection = playerdata[currentSocketId]["fd"];
-        let heldDirections = playerHeldDirections[currentSocketId];
+    for (const [entryKey, value] of Object.entries(playerdata)) {
+        const oldData = JSON.stringify(playerdata[entryKey]);
+        
+        let facingDirection = playerdata[entryKey]["fd"];
+        const heldDirections = playerHeldDirections[entryKey];
+        const playerBody = playerBodies[entryKey];
 
         if (heldDirections == null) {
             continue;
@@ -317,35 +323,52 @@ function gameLoop() {
         const walkingLR = heldDirections[directions.left] != heldDirections[directions.right];
         const walking = walkingUD || walkingLR;
         if (heldDirections && walking) {
-            if (walkingUD) {
-                if (heldDirections[directions.up] == true) { y -= speed; }
-                if (heldDirections[directions.down] == true) { y += speed; }
-            }
+            const directionAngle = 0.0;
             if (walkingLR) {
-                if (heldDirections[directions.left] == true) { x -= speed; facingDirection = directions.left }
-                if (heldDirections[directions.right] == true) { x += speed; facingDirection = directions.right }
+                if (!walkingUD) {
+                    if (heldDirections[directions.right] == true) { directionAngle = 0; facingDirection = directions.right }
+                    else if (heldDirections[directions.left] == true) { directionAngle = Math.PI; facingDirection = directions.left }
+                } else if (walkingUD) {
+                    if (heldDirections[directions.right] == true) {
+                        if (heldDirections[directions.up] == true) {directionAngle = Math.PI * 1 / 4; facingDirection = directions.right}
+                        else if (heldDirections[directions.down] == true) {directionAngle = Math.PI * 7 / 4; facingDirection = directions.right}
+                    } 
+                    else if (heldDirections[directions.left] == true) {
+                        if (heldDirections[directions.up] == true) {directionAngle = Math.PI * 3 / 4; facingDirection = directions.left}
+                        else if (heldDirections[directions.down] == true) {directionAngle = Math.PI * 5 / 4; facingDirection = directions.left}
+                    }
+                }
+            } else if (walkingUD) {
+                if (heldDirections[directions.up] == true) { directionAngle = Math.PI / 2 }
+                else if (heldDirections[directions.down] == true) { directionAngle = Math.PI * 3 / 2 }
             }
+
+            const movementVector = planck.Vec2(Math.cos(directionAngle), Math.sin(directionAngle));
+            movementVector.mul(speed)
+            playerBody.setLinearVelocity(movementVector); //qui è possibile inizializzare movementVector a player.getLinearVelocity, sommarci i valori e poi fare set
         }
 
+        // let [x, y] = playerdata[entryKey]["xy"];
+
         //Limits (gives the illusion of walls)
-        var leftLimit = -8;
-        var rightLimit = (16 * 11) + 8;
-        var topLimit = -8 + 32;
-        var bottomLimit = (16 * 7);
-        if (x < leftLimit) { x = leftLimit; }
-        if (x > rightLimit) { x = rightLimit; }
-        if (y < topLimit) { y = topLimit; }
-        if (y > bottomLimit) { y = bottomLimit; }
-        //console.log(currentSocketId + " moved to " + [x, y]);
+        // var leftLimit = -8;
+        // var rightLimit = (16 * 11) + 8;
+        // var topLimit = -8 + 32;
+        // var bottomLimit = (16 * 7);
+        // if (x < leftLimit) { x = leftLimit; }
+        // if (x > rightLimit) { x = rightLimit; }
+        // if (y < topLimit) { y = topLimit; }
+        // if (y > bottomLimit) { y = bottomLimit; }
+        //console.log(entryKey + " moved to " + [x, y]);
+        const playerPosition = playerBody.getPosition();
+        playerdata[entryKey]["xy"] = [Math.round(playerPosition.x), Math.round(playerPosition.y)];
+        playerdata[entryKey]["fd"] = facingDirection;
+        playerdata[entryKey]["wa"] = walking;
 
-        playerdata[currentSocketId]["xy"] = [x, y];
-        playerdata[currentSocketId]["fd"] = facingDirection;
-        playerdata[currentSocketId]["wa"] = walking;
-
-        let newData = JSON.stringify(playerdata[currentSocketId]);
+        const newData = JSON.stringify(playerdata[entryKey]);
         if (oldData !== newData) {
-            if (!needsUpdating[currentSocketId]) {
-                needsUpdating[currentSocketId] = true;
+            if (!needsUpdating[entryKey]) {
+                needsUpdating[entryKey] = true;
             }
         }
     }
@@ -377,7 +400,7 @@ function gameLoop() {
     world.clearForces();
 
     //TODO: https://github.com/shakiba/planck.js/wiki/World#exploring-the-world
-    //fare l'esplorazione al posto del gameloop per aggiornare i playerData
+    //fare l'esplorazione al posto del gameloop per aggiornare i playerData (FATTO SOPRA DOVE AGGIORNA LA POSIZIONE DEL PLAYER)
 
     //TODO: AABB Query per rilevare chi sta in una regione, così gli attacchi che fanno danno ad area vengono rilevati
     //      Un'alterativa potrebbe essere creare un corpo rotate per l'attacco unito al body e rilevare le collisioni per applicare il danno
