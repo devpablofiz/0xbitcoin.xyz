@@ -146,7 +146,7 @@ const Game = ({
          <div className="Game-body">
             <div className="container-game">
                <Camera socket={socket} focusChat={focusChat} identifier={identifier} isConnected={isConnected} ref={cameraRef} />
-               <Chat socket={socket} chatData={chatData} focusCamera={focusCamera} ref={chatRef} />
+               <Chat socket={socket} chatData={chatData} focusCamera={focusCamera} nickName={identifier} ref={chatRef} />
             </div>
          </div>
       )
