@@ -88,7 +88,7 @@ const Game = ({
 
          IOsocket = socketIOClient(ENDPOINT,{
             auth:{
-               signature: "pooped",
+               signature: signedMsg,
                address: address
             }
          });
