@@ -104,10 +104,6 @@ io.on("connection", (socket) => {
 
     socket.on("move", (heldDirections) => {
         playerHeldDirections[socket.id] = heldDirections;
-        if(!needsUpdating[socket.id]){
-            needsUpdating[socket.id] = true;
-        }
-        
         //console.log(socket.id+" requested movement");
     });
 
@@ -128,13 +124,16 @@ let debugPrint = 0;
 
 function gameLoop() {
     for (const [currentSocketId, value] of Object.entries(playerdata)) {
+        let oldData = JSON.stringify(playerdata[currentSocketId]);
+
         let [x, y] = playerdata[currentSocketId]["xy"];
         let facingDirection = playerdata[currentSocketId]["fd"];
         let heldDirections = playerHeldDirections[currentSocketId];
+
         if (heldDirections == null) {
             continue;
         }
-        
+
         const walkingUD = heldDirections[directions.up] != heldDirections[directions.down];
         const walkingLR = heldDirections[directions.left] != heldDirections[directions.right];
         const walking = walkingUD || walkingLR;
@@ -163,6 +162,13 @@ function gameLoop() {
         playerdata[currentSocketId]["xy"] = [x, y];
         playerdata[currentSocketId]["fd"] = facingDirection;
         playerdata[currentSocketId]["wa"] = walking;
+
+        let newData = JSON.stringify(playerdata[currentSocketId]);
+        if(oldData !== newData){
+            if(!needsUpdating[currentSocketId]){
+                needsUpdating[currentSocketId] = true;
+            }
+        }
     }
 
     if(debugPrint > ticksPerSecond*10){
@@ -171,13 +177,16 @@ function gameLoop() {
         debugPrint = 0;
     }
 
-    if(Object.keys(needsUpdating).length > 0){
-        let toUpdate = {}
-        for(const [socketID] of Object.entries(needsUpdating)){
+    let toUpdate = {}
+    for(const [socketID] of Object.entries(needsUpdating)){
+        if(needsUpdating[socketID]){
             toUpdate[socketID] = playerdata[socketID];
             needsUpdating[socketID] = false;
         }
-
+    }
+    
+    if(Object.keys(toUpdate).length > 0){
+        console.log(toUpdate);
         io.emit("playerdataupdate", toUpdate)
     }
 
