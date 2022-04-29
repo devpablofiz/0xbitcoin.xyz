@@ -22,14 +22,14 @@ let speed = 5;
 
 const handleMessage = (socket, msg) => {
     playerdata[socket]["msg"] = msg;
-    if(!needsUpdating[socket.id]){
-        needsUpdating[socket.id] = true;
+    if(!needsUpdating[socket]){
+        needsUpdating[socket] = true;
     }
     setTimeout(() => {
         if(playerdata[socket]["msg"] === msg){
             playerdata[socket]["msg"] = "";
-            if(!needsUpdating[socket.id]){
-                needsUpdating[socket.id] = true;
+            if(!needsUpdating[socket]){
+                needsUpdating[socket] = true;
             }
         }
     }, 2000);
@@ -186,7 +186,6 @@ function gameLoop() {
     }
     
     if(Object.keys(toUpdate).length > 0){
-        console.log(toUpdate);
         io.emit("playerdataupdate", toUpdate)
     }
 
