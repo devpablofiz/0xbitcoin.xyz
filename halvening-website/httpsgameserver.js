@@ -15,12 +15,26 @@ const randomFourDigit = () => {
 
 const provider = new AlchemyProvider("homestead", config.alchemyKey);
 
+
+/**
+ * Dichiarazione server HTTPS
+ */
+/*
 const privateKey = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/privkey.pem', 'utf8');
 const certificate = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/fullchain.pem', 'utf8');
 const server = https.createServer({
     key: privateKey,
     cert: certificate
 }, app);
+*/
+
+/**
+ * Dichiarazione server Http (localhost test)
+ */
+const http = require('http');
+const server = http.createServer(app);
+
+
 
 function checkSignature(nonce, signature) {
     const msgParams = {
@@ -59,6 +73,38 @@ const directions = {
     left: "left",
     right: "right"
 }
+
+
+
+
+
+
+//physics setup - planck.js
+const planck = require('planck');
+
+//world setup
+const gravity = planck.Vec2(0.0, 0.0);
+const world = planck.World({
+    //gravity: gravity,
+    allowSleep: true
+});
+//timestep
+const ticksPerSecond = 20.0;
+const timeStep = 1.0 / ticksPerSecond;
+const velocityIterations = 20;
+const positionIterations = 20;
+
+
+
+
+
+
+
+
+
+
+
+
 
 const io = require("socket.io")(server, {
     cors: {
@@ -227,8 +273,7 @@ function gameLoop() {
     debugPrint++;
 }
 
-const ticksPerSecond = 20.0;
-const tickrate = (1.0 / ticksPerSecond) * 1000;
+const tickrate = timeStep * 1000;
 let intervalId = setInterval(gameLoop, tickrate);
 
 

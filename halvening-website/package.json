@@ -14,6 +14,7 @@
     "cors": "^2.8.5",
     "moment": "^2.29.1",
     "node-polyfill-webpack-plugin": "^1.1.4",
+    "planck": "^1.0.0-alpha.4",
     "react": "^17.0.2",
     "react-alert": "7.0.3",
     "react-alert-template-basic": "^1.0.2",
