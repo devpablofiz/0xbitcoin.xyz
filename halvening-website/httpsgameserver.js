@@ -18,7 +18,6 @@ const provider = new AlchemyProvider("mainnet", config.alchemyKey);
 /**
  * Dichiarazione server HTTPS
  */
-
 const privateKey = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/privkey.pem', 'utf8');
 const certificate = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/fullchain.pem', 'utf8');
 const server = https.createServer({
@@ -30,8 +29,8 @@ const server = https.createServer({
 /**
  * Dichiarazione server Http (localhost test)
  */
-//const http = require('http');
-//const server = http.createServer(app);
+// const http = require('http');
+// const server = http.createServer(app);
 
 
 
@@ -58,7 +57,6 @@ let rockData = { 1: { 'xy': [100, 40] }, 2: { 'xy': [109, 80] } };
 let filter = new Filter();
 let chatMessages = [];
 let playerHeldDirections = {};
-let speed = 5;
 
 const handleMessage = (socket, msg) => {
     playerdata[socket]["msg"] = msg;
@@ -89,6 +87,8 @@ const directions = {
 
 //physics setup - planck.js
 const planck = require('planck');
+//player speed
+let speed = 500;
 
 //world setup
 const gravity = planck.Vec2(0.0, 0.0);
@@ -109,10 +109,10 @@ const positionIterations = 20;
 
 //map chain edge shape
 const mapGridSize = 16;
-const mapGridBaseLength = 0;
-const mapGridBaseHeigth = 4;
-const mapGridLength = 11;
-const mapGridHeigth = 3;
+const mapGridBaseLength = -2;
+const mapGridBaseHeigth = 2;
+const mapGridLength = 12;
+const mapGridHeigth = 6;
 const mapEdgeVertices = [
     planck.Vec2((mapGridBaseLength)                 * mapGridSize, (mapGridBaseHeigth)                 * mapGridSize),    //top left
     planck.Vec2((mapGridBaseLength + mapGridLength) * mapGridSize, (mapGridBaseHeigth)                 * mapGridSize),   //top right
@@ -120,8 +120,16 @@ const mapEdgeVertices = [
     planck.Vec2((mapGridBaseLength)                 * mapGridSize, (mapGridBaseHeigth + mapGridHeigth) * mapGridSize)     //bottom left
 ];
 const mapChain = planck.Chain(mapEdgeVertices, true);
-
-
+const mapBody = world.createBody({
+    type: 'static', //should be moved only applying velocity
+    position: planck.Vec2(0, 0), //setup initial position
+    angle: 0, //setup initial angle in radians
+});
+const maxFixiture = mapBody.createFixture({
+    shape: mapChain,
+    friction: 0,
+    restitution: 0
+});
 
 
 
@@ -217,8 +225,8 @@ io.on("connection", (socket) => {
     const playerBody = world.createBody({
         type: 'dynamic', //should be moved only applying velocity
         position: planck.Vec2(
-            (mapGridBaseLength + mapGridLength) * mapGridSize / 2.0, 
-            (mapGridBaseHeigth + mapGridHeigth) * mapGridSize / 2.0
+            (mapGridBaseLength + (mapGridLength / 2.0)) * mapGridSize, 
+            (mapGridBaseHeigth + (mapGridHeigth / 2.0)) * mapGridSize
         ), //setup initial position
         angle: 0.0 * Math.PI, //setup initial angle in radians
         linearDamping: 0, //set to 0 because causes bodies to float
@@ -323,28 +331,33 @@ function gameLoop() {
         const walkingLR = heldDirections[directions.left] != heldDirections[directions.right];
         const walking = walkingUD || walkingLR;
         if (heldDirections && walking) {
-            const directionAngle = 0.0;
+            let directionAngle = 0.0;
             if (walkingLR) {
                 if (!walkingUD) {
                     if (heldDirections[directions.right] == true) { directionAngle = 0; facingDirection = directions.right }
                     else if (heldDirections[directions.left] == true) { directionAngle = Math.PI; facingDirection = directions.left }
                 } else if (walkingUD) {
                     if (heldDirections[directions.right] == true) {
-                        if (heldDirections[directions.up] == true) {directionAngle = Math.PI * 1 / 4; facingDirection = directions.right}
-                        else if (heldDirections[directions.down] == true) {directionAngle = Math.PI * 7 / 4; facingDirection = directions.right}
+                        if (heldDirections[directions.down] == true) {directionAngle = Math.PI * 1 / 4; facingDirection = directions.right}
+                        else if (heldDirections[directions.up] == true) {directionAngle = Math.PI * 7 / 4; facingDirection = directions.right}
                     } 
                     else if (heldDirections[directions.left] == true) {
-                        if (heldDirections[directions.up] == true) {directionAngle = Math.PI * 3 / 4; facingDirection = directions.left}
-                        else if (heldDirections[directions.down] == true) {directionAngle = Math.PI * 5 / 4; facingDirection = directions.left}
+                        if (heldDirections[directions.down] == true) {directionAngle = Math.PI * 3 / 4; facingDirection = directions.left}
+                        else if (heldDirections[directions.up] == true) {directionAngle = Math.PI * 5 / 4; facingDirection = directions.left}
                     }
                 }
             } else if (walkingUD) {
-                if (heldDirections[directions.up] == true) { directionAngle = Math.PI / 2 }
-                else if (heldDirections[directions.down] == true) { directionAngle = Math.PI * 3 / 2 }
+                if (heldDirections[directions.down] == true) { directionAngle = Math.PI / 2 }
+                else if (heldDirections[directions.up] == true) { directionAngle = Math.PI * 3 / 2 }
             }
 
             const movementVector = planck.Vec2(Math.cos(directionAngle), Math.sin(directionAngle));
-            movementVector.mul(speed)
+            //console.log(movementVector);
+            movementVector.mul(speed);
+            //console.log(movementVector);
+            playerBody.setLinearVelocity(movementVector); //qui è possibile inizializzare movementVector a player.getLinearVelocity, sommarci i valori e poi fare set
+        } else if (!walking) {
+            const movementVector = planck.Vec2(0, 0);
             playerBody.setLinearVelocity(movementVector); //qui è possibile inizializzare movementVector a player.getLinearVelocity, sommarci i valori e poi fare set
         }
 
@@ -373,7 +386,7 @@ function gameLoop() {
         }
     }
 
-    if (debugPrint > ticksPerSecond * 10) {
+    if (debugPrint > ticksPerSecond * 1) {
         console.log(playerdata);
         io.emit("playerdata", playerdata);
         debugPrint = 0;
