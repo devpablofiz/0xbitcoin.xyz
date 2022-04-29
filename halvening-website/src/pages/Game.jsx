@@ -9,9 +9,9 @@ import { randomFourDigit } from '../utils'
 import '../Game.css';
 import '../App.css';
 
-const ENDPOINT = "http://localhost:4001";
+//const ENDPOINT = "http://localhost:4001";
 
-//const ENDPOINT = "https://0xbitcoin.xyz:4001";
+const ENDPOINT = "https://0xbitcoin.xyz:4001";
 
 const Game = ({
    provider,

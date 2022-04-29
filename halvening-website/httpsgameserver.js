@@ -5,34 +5,33 @@ const fs = require('fs');
 const Filter = require('bad-words');
 const ethSigUtil = require("eth-sig-util");
 const { AlchemyProvider } = require("@ethersproject/providers");
+
 const config = require("./config.json");
+const provider = new AlchemyProvider("mainnet", config.alchemyKey);
 
-const randomFourDigit = () => {
-    const val = Math.floor(1000 + Math.random() * 9000);
-
-    return val;
-}
-
-const provider = new AlchemyProvider("homestead", config.alchemyKey);
+//const ens = new (ENS.default)({
+//    signer,
+//    ensAddress: getEnsAddress("1")
+//});
 
 
 /**
  * Dichiarazione server HTTPS
  */
-/*
+
 const privateKey = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/privkey.pem', 'utf8');
 const certificate = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/fullchain.pem', 'utf8');
 const server = https.createServer({
     key: privateKey,
     cert: certificate
 }, app);
-*/
+
 
 /**
  * Dichiarazione server Http (localhost test)
  */
-const http = require('http');
-const server = http.createServer(app);
+//const http = require('http');
+//const server = http.createServer(app);
 
 
 
@@ -134,6 +133,21 @@ io.on("connection", (socket) => {
         
         console.log("Auth as " + sigAddress + ": " + socket.id);
         entryKey = sigAddress;
+
+        const fetchEns = async () => {
+            let name = await provider.lookupAddress(entryKey);
+            return name.split('.')[0];;
+        }
+
+        fetchEns().then((res) => {
+            if(res){
+                playerdata[entryKey]["nm"] = res;
+            
+                if (!needsUpdating[entryKey]) {
+                    needsUpdating[entryKey] = true;
+                }
+            }
+        });
         
     } else if (authData.address === "Guest") {
         console.log("Auth as guest: " + socket.id);
@@ -159,7 +173,12 @@ io.on("connection", (socket) => {
         [directions.right]: false,
         [directions.down]: false,
     }
+
     playerHeldDirections[entryKey] = heldDirections;
+
+    if (!needsUpdating[entryKey]) {
+        needsUpdating[entryKey] = true;
+    }
 
     //planck body definition
     const playerBody = world.createBody({
@@ -280,10 +299,10 @@ function gameLoop() {
     }
 
     let toUpdate = {}
-    for (const [socketID] of Object.entries(needsUpdating)) {
-        if (needsUpdating[socketID]) {
-            toUpdate[socketID] = playerdata[socketID];
-            needsUpdating[socketID] = false;
+    for (const [entry] of Object.entries(needsUpdating)) {
+        if (needsUpdating[entry]) {
+            toUpdate[entry] = playerdata[entry];
+            needsUpdating[entry] = false;
         }
     }
 
