@@ -9,7 +9,7 @@ const config = require("./config.json");
 
 const randomFourDigit = () => {
     const val = Math.floor(1000 + Math.random() * 9000);
-    
+
     return val;
 }
 
@@ -46,7 +46,7 @@ function checkSignature(nonce, signature) {
 
 let playerdata = {};
 let needsUpdating = {}
-let rockData = { 1:{'xy':[100,40]}, 2:{'xy':[109,80]}};
+let rockData = { 1: { 'xy': [100, 40] }, 2: { 'xy': [109, 80] } };
 let filter = new Filter();
 let chatMessages = [];
 let playerHeldDirections = {};
@@ -54,13 +54,13 @@ let speed = 5;
 
 const handleMessage = (socket, msg) => {
     playerdata[socket]["msg"] = msg;
-    if(!needsUpdating[socket]){
+    if (!needsUpdating[socket]) {
         needsUpdating[socket] = true;
     }
     setTimeout(() => {
-        if(playerdata[socket] && playerdata[socket]["msg"] === msg){
+        if (playerdata[socket] && playerdata[socket]["msg"] === msg) {
             playerdata[socket]["msg"] = "";
-            if(!needsUpdating[socket]){
+            if (!needsUpdating[socket]) {
                 needsUpdating[socket] = true;
             }
         }
@@ -94,7 +94,8 @@ const timeStep = 1.0 / ticksPerSecond;
 const velocityIterations = 20;
 const positionIterations = 20;
 
-
+//bodies pointers
+const playerBodies = {};
 
 
 
@@ -108,7 +109,7 @@ const positionIterations = 20;
 
 const io = require("socket.io")(server, {
     cors: {
-        origins: ["https://www.0xbitcoin.xyz","https://0xbitcoin.xyz","https://halvening.0xbitcoin.xyz","188.217.53.60"],
+        origins: ["https://www.0xbitcoin.xyz", "https://0xbitcoin.xyz", "https://halvening.0xbitcoin.xyz", "http://localhost:3000"],
         methods: ["GET", "POST"]
     }
 });
@@ -122,28 +123,31 @@ io.on("connection", (socket) => {
 
     let entryKey;
 
-    if(authData.address !== "Guest"){
-        let sigAddress = checkSignature("By signing this message I confirm that this is my own address",authData.signature)
+    if (authData.address !== "Guest") {
+        let sigAddress = checkSignature("By signing this message I confirm that this is my own address", authData.signature)
 
-        if(sigAddress !== authData.address){
+        if (sigAddress !== authData.address) {
             console.log("Auth failed: " + socket.id);
             socket.disconnect();
-        }else{
-            console.log("Auth as "+sigAddress+": " + socket.id);
-            entryKey = sigAddress;
+            return;
         }
-    }else if (authData.address === "Guest"){
+        
+        console.log("Auth as " + sigAddress + ": " + socket.id);
+        entryKey = sigAddress;
+        
+    } else if (authData.address === "Guest") {
         console.log("Auth as guest: " + socket.id);
         entryKey = authData.signature;
     }
 
-    if(playerdata[entryKey]){
+    if (playerdata[entryKey]) {
         console.log("User already logged in: " + entryKey);
-        socket.disconnect();       
+        socket.disconnect();
+        return;
     }
 
     playerdata[entryKey] = {};
-    
+
     playerdata[entryKey]["xy"] = [90, 34];
     playerdata[entryKey]["fd"] = directions.down;
     playerdata[entryKey]["wa"] = false;
@@ -161,19 +165,19 @@ io.on("connection", (socket) => {
         socket.emit("newmessage", chatMessages)
         socket.emit("rockdata", rockData);
         socket.emit("playerdata", playerdata);
-    
-        if(!needsUpdating[entryKey]){
+
+        if (!needsUpdating[entryKey]) {
             needsUpdating[entryKey] = true;
         }
     })
 
-    socket.on("sendmessage", ([nm,msg])=>{
-        if(msg.length > 64){
-            console.log(entryKey+"sent a very long message")
-            return
+    socket.on("sendmessage", ([nm, msg]) => {
+        if (msg.length > 64) {
+            console.log(entryKey + "sent a very long message")
+            return;
         }
 
-        if(chatMessages.length >= 16){
+        if (chatMessages.length >= 16) {
             chatMessages.shift()
         }
 
@@ -185,7 +189,6 @@ io.on("connection", (socket) => {
 
     socket.on("move", (heldDirections) => {
         playerHeldDirections[entryKey] = heldDirections;
-        //console.log(socket.id+" requested movement");
     });
 
     socket.on("disconnect", () => {
@@ -222,7 +225,7 @@ function gameLoop() {
             if (walkingUD) {
                 if (heldDirections[directions.up] == true) { y -= speed; }
                 if (heldDirections[directions.down] == true) { y += speed; }
-            } 
+            }
             if (walkingLR) {
                 if (heldDirections[directions.left] == true) { x -= speed; facingDirection = directions.left }
                 if (heldDirections[directions.right] == true) { x += speed; facingDirection = directions.right }
@@ -245,32 +248,45 @@ function gameLoop() {
         playerdata[currentSocketId]["wa"] = walking;
 
         let newData = JSON.stringify(playerdata[currentSocketId]);
-        if(oldData !== newData){
-            if(!needsUpdating[currentSocketId]){
+        if (oldData !== newData) {
+            if (!needsUpdating[currentSocketId]) {
                 needsUpdating[currentSocketId] = true;
             }
         }
     }
 
-    if(debugPrint > ticksPerSecond*10){
+    if (debugPrint > ticksPerSecond * 10) {
         console.log(playerdata);
         io.emit("playerdata", playerdata);
         debugPrint = 0;
     }
 
     let toUpdate = {}
-    for(const [socketID] of Object.entries(needsUpdating)){
-        if(needsUpdating[socketID]){
+    for (const [socketID] of Object.entries(needsUpdating)) {
+        if (needsUpdating[socketID]) {
             toUpdate[socketID] = playerdata[socketID];
             needsUpdating[socketID] = false;
         }
     }
-    
-    if(Object.keys(toUpdate).length > 0){
+
+    if (Object.keys(toUpdate).length > 0) {
         io.emit("playerdataupdate", toUpdate)
     }
 
     debugPrint++;
+
+
+    //planck timestep
+    world.step(timeStep, velocityIterations, positionIterations);
+    //planck clearForces clear forces applied to bodies
+    world.clearForces();
+
+    //TODO: https://github.com/shakiba/planck.js/wiki/World#exploring-the-world
+    //fare l'esplorazione al posto del gameloop per aggiornare i playerData
+
+    //TODO: AABB Query per rilevare chi sta in una regione, così gli attacchi che fanno danno ad area vengono rilevati
+    //      Un'alterativa potrebbe essere creare un corpo rotate per l'attacco unito al body e rilevare le collisioni per applicare il danno
+
 }
 
 const tickrate = timeStep * 1000;
