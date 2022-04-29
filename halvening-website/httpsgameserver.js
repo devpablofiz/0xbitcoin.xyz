@@ -161,6 +161,24 @@ io.on("connection", (socket) => {
     }
     playerHeldDirections[entryKey] = heldDirections;
 
+    //planck body definition
+    const playerBody = world.createBody({
+        type: 'dynamic', //should be moved only applying velocity
+        position: planck.Vec2(0, 2), //setup initial position
+        angle: 0.0 * Math.PI, //setup initial angle in radians
+        linearDamping: 0, //set to 0 because causes bodies to float
+        angularDamping: 0, //set to 0 because causes bodies to float
+        gravityScale: 0, //does not apply gravity
+        allowSleep: true, //allows the server to remove from calculation when needed
+        awake: true, //starts awake
+        fixedRotation: true, //disables rotation movement
+        bullet: false, //if true increases checks for collisions
+        active: true, //if false collisions with this body are completely disabled
+        userData: entryKey, //free pointer to use
+
+    });
+    playerBodies[entryKey] = playerBody;
+
     socket.on("ready", () => {
         socket.emit("newmessage", chatMessages)
         socket.emit("rockdata", rockData);
