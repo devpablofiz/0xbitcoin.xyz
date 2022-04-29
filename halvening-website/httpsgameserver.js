@@ -40,7 +40,16 @@ function checkSignature(nonce, signature) {
         data: nonce,
         sig: signature
     };
-    return ethSigUtil.recoverPersonalSignature(msgParams);
+
+    let res;
+
+    try {
+        res = ethSigUtil.recoverPersonalSignature(msgParams);
+    } catch (error) {
+        res = error
+    }
+
+    return res;
 }
 
 let playerdata = {};
@@ -127,6 +136,7 @@ io.on("connection", (socket) => {
 
         if (sigAddress !== authData.address) {
             console.log("Auth failed: " + socket.id);
+            socket.emit("err","Signature does not match")
             socket.disconnect();
             return;
         }
@@ -156,6 +166,7 @@ io.on("connection", (socket) => {
 
     if (playerdata[entryKey]) {
         console.log("User already logged in: " + entryKey);
+        socket.emit("err","You are already logged in")
         socket.disconnect();
         return;
     }

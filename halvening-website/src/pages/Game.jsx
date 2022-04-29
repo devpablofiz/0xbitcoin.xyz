@@ -25,6 +25,7 @@ const Game = ({
    const [chatData, setChatData] = useState(null);
    const [identifier, setIdentifier] = useState(null);
    const [socket, setSocket] = useState(null);
+   const [error, setError] = useState();
 
    const [isConnected, setIsConnected] = useState(null)
 
@@ -61,7 +62,7 @@ const Game = ({
             setIsConnected(true)
          })
    
-         IOsocket.on("disconnect", () => {
+         IOsocket.on("disconnect", (err) => {
             setIsConnected(false)
          })
       }
@@ -87,22 +88,27 @@ const Game = ({
 
          IOsocket = socketIOClient(ENDPOINT,{
             auth:{
-               signature: signedMsg,
+               signature: "pooped",
                address: address
             }
          });
+         
          setSocket(IOsocket);
          setIdentifier(address)
 
          IOsocket.on("newmessage", chat => {
             setChatData(chat);
          })
+
+         IOsocket.on("err", err => {
+            setError(err);
+         })
    
          IOsocket.on("connect", () => {
             setIsConnected(true)
          })
    
-         IOsocket.on("disconnect", () => {
+         IOsocket.on("disconnect", (err) => {
             setIsConnected(false)
          })
       }
@@ -114,6 +120,7 @@ const Game = ({
 
       return () => {
          if(IOsocket){
+            setError(null);
             IOsocket.disconnect()
          }
       }
@@ -138,6 +145,7 @@ const Game = ({
          <div className="App-body">
             <div className="pixel-font mt-5">
                <p>{"There was an error while connecting to the game servers"}</p>
+               <p>{error ? "Error: "+error : ""}</p>
             </div>
          </div>
       )
