@@ -93,9 +93,31 @@ const timeStep = 1.0 / ticksPerSecond;
 const velocityIterations = 20;
 const positionIterations = 20;
 
+// var leftLimit = -8;
+// var rightLimit = (16 * 11) + 8;
+// var topLimit = -8 + 32;
+// var bottomLimit = (16 * 7);
+
+//map chain edge shape
+const mapGridSize = 16;
+const mapGridBaseLength = 0;
+const mapGridBaseHeigth = 4;
+const mapGridLength = 11;
+const mapGridHeigth = 3;
+const mapEdgeVertices = [
+    planck.Vec2((mapGridBaseLength)                 * mapGridSize, (mapGridBaseHeigth)                 * mapGridSize),    //top left
+    planck.Vec2((mapGridBaseLength + mapGridLength) * mapGridSize, (mapGridBaseHeigth)                 * mapGridSize),   //top right
+    planck.Vec2((mapGridBaseLength + mapGridLength) * mapGridSize, (mapGridBaseHeigth + mapGridHeigth) * mapGridSize),   //bottom right
+    planck.Vec2((mapGridBaseLength)                 * mapGridSize, (mapGridBaseHeigth + mapGridHeigth) * mapGridSize)     //bottom left
+];
+const mapChain = planck.Chain(mapEdgeVertices, true);
+
+
+
+
+
 //bodies pointers
 const playerBodies = {};
-
 
 
 
@@ -183,7 +205,10 @@ io.on("connection", (socket) => {
     //planck body definition
     const playerBody = world.createBody({
         type: 'dynamic', //should be moved only applying velocity
-        position: planck.Vec2(0, 2), //setup initial position
+        position: planck.Vec2(
+            (mapGridBaseLength + mapGridLength) * mapGridSize / 2.0, 
+            (mapGridBaseHeigth + mapGridHeigth) * mapGridSize / 2.0
+        ), //setup initial position
         angle: 0.0 * Math.PI, //setup initial angle in radians
         linearDamping: 0, //set to 0 because causes bodies to float
         angularDamping: 0, //set to 0 because causes bodies to float
@@ -194,9 +219,31 @@ io.on("connection", (socket) => {
         bullet: false, //if true increases checks for collisions
         active: true, //if false collisions with this body are completely disabled
         userData: entryKey, //free pointer to use
-
     });
+    //optional mass configuration
+    // playerBody.setMassData({
+    //     I: 0, //0 disables rotation: 1 rotates normally, 0.1 rotates fast, 1000 rotates slowly
+    //     mass: 1, //cannot be 0 for dynamic bodies
+    //     center: planck.Vec2(0, 0), //defaults to center of body
+    // });
     playerBodies[entryKey] = playerBody;
+    //body shape initialization
+    const playerShape = planck.Box(mapGridSize / 2, mapGridSize / 2); //created with half extents
+    //body fixiture initialization
+    const playerCollisionGroupIndex = -1; //all fixitures of bodies that are in the same negative group wont collide
+    const playerCollisionCategoryBits = 0x0002; //category of collision
+    const playerCollisionMaskBits = 0xFFFF ^ playerCollisionCategoryBits; //categories to collide with (all except players themselves)
+    const playerFixiture = playerBody.createFixture({ //non importa salvare playerFixiture
+        shape: playerShape,
+        density: 0, //density of the body, used with mass data to calculate weight, with 0 density behaves like it has 0 mass
+        friction: 0, //no friction
+        restitution: 0, //no restitution when colliding
+        isSensor: false, //this is not a sensor
+        filterGroupIndex: playerCollisionGroupIndex,
+        filterCategoryBits: playerCollisionCategoryBits,
+        filterMaskBits: playerCollisionMaskBits
+    });
+
 
     socket.on("ready", () => {
         socket.emit("newmessage", chatMessages)
