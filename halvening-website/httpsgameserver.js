@@ -26,7 +26,7 @@ const handleMessage = (socket, msg) => {
         needsUpdating[socket] = true;
     }
     setTimeout(() => {
-        if(playerdata[socket]["msg"] === msg){
+        if(playerdata[socket] && playerdata[socket]["msg"] === msg){
             playerdata[socket]["msg"] = "";
             if(!needsUpdating[socket]){
                 needsUpdating[socket] = true;
@@ -61,7 +61,7 @@ io.on("connection", (socket) => {
     playerdata[socket.id]["xy"] = [90, 34];
     playerdata[socket.id]["fd"] = directions.down;
     playerdata[socket.id]["wa"] = false;
-    playerdata[socket.id]["nm"] = socket.id;
+
     let heldDirections = {
         [directions.up]: false,
         [directions.left]: false,
@@ -70,13 +70,15 @@ io.on("connection", (socket) => {
     }
     playerHeldDirections[socket.id] = heldDirections;
 
-    socket.emit("newmessage", chatMessages)
-    socket.emit("rockdata", rockData);
-    socket.emit("playerdata", playerdata);
-
-    if(!needsUpdating[socket.id]){
-        needsUpdating[socket.id] = true;
-    }
+    socket.on("ready", () => {
+        socket.emit("newmessage", chatMessages)
+        socket.emit("rockdata", rockData);
+        socket.emit("playerdata", playerdata);
+    
+        if(!needsUpdating[socket.id]){
+            needsUpdating[socket.id] = true;
+        }
+    })
 
     socket.on("setdisplayname", (nickname)=>{
         playerdata[socket.id]["nm"] = nickname;

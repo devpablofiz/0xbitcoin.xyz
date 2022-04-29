@@ -44,7 +44,7 @@ let defaultHeldKeys = {
 let heldKeys = { ...defaultHeldKeys };
 
 
-const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
+const Camera = forwardRef(({ socket, focusChat, isConnected }, cameraRef) => {
     const [playerData, setPlayerData] = useState(null);
     const [newData, setNewData] = useState(null)
 
@@ -129,7 +129,19 @@ const Camera = forwardRef(({ socket, focusChat }, cameraRef) => {
         handleResize();
         window.addEventListener('resize', handleResize);
 
-    }, [socket])
+        return () => {
+            socket.removeListener("playerdata");
+            socket.removeListener("rockdata");
+            socket.removeListener("playerdataupdate");
+        }
+
+    }, [socket, isConnected])
+
+    useEffect(()=>{
+        if(socket && isConnected){
+           socket.emit("ready")
+        }
+     },[socket, isConnected])
 
     useEffect(() => {
         if (socketId && cameraRef && cameraRef.current) {

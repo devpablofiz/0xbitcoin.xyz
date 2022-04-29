@@ -24,6 +24,9 @@ const Game = ({
    const [chatData, setChatData] = useState(null);
    const [nickName, setNickName] = useState(null);
    const [socket, setSocket] = useState(null);
+
+   const [isConnected, setIsConnected] = useState(null)
+
    const [isGuest, setIsGuest] = useState(false);
 
    const chatRef = useRef(null);
@@ -44,16 +47,16 @@ const Game = ({
    }, [provider]);
 
    useEffect(() => {
-      if (ensName != null && ensName.name != null && socket) {
+      if (ensName != null && ensName.name != null && socket && isConnected) {
          socket.emit("setdisplayname", ensName.name.split('.')[0]);
          setNickName(ensName.name.split('.')[0]);
-      } else if (ensName != null && ensName.name == null && socket) {
+      } else if (ensName != null && ensName.name == null && socket && isConnected) {
          socket.emit("setdisplayname", account.substring(0, 10))
          setNickName(account.substring(0, 10));
-      } else if (isGuest && socket) {
+      } else if (isGuest && socket && isConnected) {
          socket.emit("setdisplayname", nickName);
       }
-   }, [ensName, socket, account, isGuest, nickName]);
+   }, [ensName, socket, account, isGuest, nickName, isConnected]);
 
    useEffect(() => {
 
@@ -66,22 +69,29 @@ const Game = ({
       }
 
       const IOsocket = socketIOClient(ENDPOINT,{
-         //options
       });
 
       setSocket(IOsocket);
-
+      
       IOsocket.on("newmessage", chat => {
-         setChatData(chat)
+         setChatData(chat);
+      })
+
+      IOsocket.on("connect", () => {
+         setIsConnected(true)
+      })
+
+      IOsocket.on("disconnect", () => {
+         setIsConnected(false)
       })
 
       //cleanup
       return () => {
+         IOsocket.removeAllListeners();
          IOsocket.disconnect()
       }
 
    }, [account, isGuest]);
-
 
    if (!provider && !nickName) {
       return (
@@ -96,19 +106,29 @@ const Game = ({
       )
    }
 
-   if (socket) {
+   if (socket && !isConnected) {
+      return (
+         <div className="App-body">
+            <div className="pixel-font mt-5">
+               <p>{"There was an error while connecting to the game servers"}</p>
+            </div>
+         </div>
+      )
+   } else if(socket && isConnected){
       return (
          <div className="Game-body">
             <div className="container-game">
-               <Camera socket={socket} focusChat={focusChat} ref={cameraRef} />
+               <Camera socket={socket} focusChat={focusChat} isConnected={isConnected} ref={cameraRef} />
                <Chat socket={socket} chatData={chatData} nickName={nickName} focusCamera={focusCamera} ref={chatRef} />
             </div>
          </div>
       )
-   } else {
+   }else {
       return (
-         <div className="Game-body">
-            {"Loading..."}
+         <div className="App-body">
+            <div className="pixel-font mt-5">
+               <p>{"Loading..."}</p>
+            </div>
          </div>
       )
    }
