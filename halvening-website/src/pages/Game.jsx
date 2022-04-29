@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Stack, Button } from 'react-bootstrap';
 
+import { Web3Provider } from "@ethersproject/providers";
 import socketIOClient from "socket.io-client";
 import { Chat, Camera } from '../components';
 import { randomFourDigit } from '../utils'
@@ -22,7 +23,7 @@ const Game = ({
 }) => {
 
    const [chatData, setChatData] = useState(null);
-   const [nickName, setNickName] = useState(null);
+   const [identifier, setIdentifier] = useState(null);
    const [socket, setSocket] = useState(null);
 
    const [isConnected, setIsConnected] = useState(null)
@@ -46,61 +47,93 @@ const Game = ({
       }
    }, [provider]);
 
-   useEffect(() => {
-      if (ensName != null && ensName.name != null && socket && isConnected) {
-         socket.emit("setdisplayname", ensName.name.split('.')[0]);
-         setNickName(ensName.name.split('.')[0]);
-      } else if (ensName != null && ensName.name == null && socket && isConnected) {
-         socket.emit("setdisplayname", account.substring(0, 10))
-         setNickName(account.substring(0, 10));
-      } else if (isGuest && socket && isConnected) {
-         socket.emit("setdisplayname", nickName);
+   useEffect(()=>{
+      let IOsocket;
+      const authenticate = async (msg, address) => {
+         IOsocket = socketIOClient(ENDPOINT,{
+            auth:{
+               signature: msg,
+               address: address
+            }
+         });
+         setSocket(IOsocket);
+         setIdentifier(msg)
+         
+         IOsocket.on("newmessage", chat => {
+            setChatData(chat);
+         })
+   
+         IOsocket.on("connect", () => {
+            setIsConnected(true)
+         })
+   
+         IOsocket.on("disconnect", () => {
+            setIsConnected(false)
+         })
       }
-   }, [ensName, socket, account, isGuest, nickName, isConnected]);
 
-   useEffect(() => {
+      if(isGuest){
+         authenticate("guest-"+randomFourDigit(),"Guest")
+      }
 
-      if (!account && !isGuest) {
-         return;
+      return () => {
+         if(IOsocket){
+            IOsocket.disconnect()
+         }
+      }
+
+   },[isGuest])
+
+   useEffect(()=>{
+      let IOsocket;
+      const authenticate = async (msg, address) => {
+         const web3Provider = new Web3Provider(provider).getSigner();
+         
+         let signedMsg = await web3Provider.signMessage(msg, address)
+
+         IOsocket = socketIOClient(ENDPOINT,{
+            auth:{
+               signature: signedMsg,
+               address: address
+            }
+         });
+         setSocket(IOsocket);
+         setIdentifier(address)
+
+         IOsocket.on("newmessage", chat => {
+            setChatData(chat);
+         })
+   
+         IOsocket.on("connect", () => {
+            setIsConnected(true)
+         })
+   
+         IOsocket.on("disconnect", () => {
+            setIsConnected(false)
+         })
       }
 
       if(account){
-         setIsGuest(false);
+         setIsGuest(false)
+         authenticate("By signing this message I confirm that this is my own address", account)
       }
 
-      const IOsocket = socketIOClient(ENDPOINT,{
-      });
-
-      setSocket(IOsocket);
-      
-      IOsocket.on("newmessage", chat => {
-         setChatData(chat);
-      })
-
-      IOsocket.on("connect", () => {
-         setIsConnected(true)
-      })
-
-      IOsocket.on("disconnect", () => {
-         setIsConnected(false)
-      })
-
-      //cleanup
       return () => {
-         IOsocket.removeAllListeners();
-         IOsocket.disconnect()
+         if(IOsocket){
+            IOsocket.disconnect()
+         }
       }
 
-   }, [account, isGuest]);
+   },[account])
 
-   if (!provider && !nickName) {
+   if (!provider && !isGuest) {
       return (
          <div className="Game-body">
             <h1 className='mt-5'>🛒🛒🛒</h1>
             <h2 className="mt-3">Connect to play</h2>
             <Stack direction="vertical" gap={3} className="col-md-2 mt-4 mx-auto">
                <Button variant="dark" onClick={loadWeb3Modal}>{"🔌 Connect Wallet 🔌"}</Button>
-               <Button variant="dark" onClick={() => { setNickName("guest-" + randomFourDigit()); setIsGuest(true) }}>{"Play as Guest"}</Button>
+               <Button variant="dark" onClick={() => { setIsGuest(true) }}>{"Play as Guest"}</Button>
             </Stack>
          </div>
       )
@@ -118,8 +151,8 @@ const Game = ({
       return (
          <div className="Game-body">
             <div className="container-game">
-               <Camera socket={socket} focusChat={focusChat} isConnected={isConnected} ref={cameraRef} />
-               <Chat socket={socket} chatData={chatData} nickName={nickName} focusCamera={focusCamera} ref={chatRef} />
+               <Camera socket={socket} focusChat={focusChat} identifier={identifier} isConnected={isConnected} ref={cameraRef} />
+               <Chat socket={socket} chatData={chatData} focusCamera={focusCamera} ref={chatRef} />
             </div>
          </div>
       )

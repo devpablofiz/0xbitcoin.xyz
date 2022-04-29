@@ -3,6 +3,17 @@ const app = express();
 const https = require('https');
 const fs = require('fs');
 const Filter = require('bad-words');
+const ethSigUtil = require("eth-sig-util");
+const { AlchemyProvider } = require("@ethersproject/providers");
+const config = require("./config.json");
+
+const randomFourDigit = () => {
+    const val = Math.floor(1000 + Math.random() * 9000);
+    
+    return val;
+}
+
+const provider = new AlchemyProvider("homestead", config.alchemyKey);
 
 const privateKey = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/privkey.pem', 'utf8');
 const certificate = fs.readFileSync('/etc/letsencrypt/live/halvening.0xbitcoin.xyz/fullchain.pem', 'utf8');
@@ -11,6 +22,13 @@ const server = https.createServer({
     cert: certificate
 }, app);
 
+function checkSignature(nonce, signature) {
+    const msgParams = {
+        data: nonce,
+        sig: signature
+    };
+    return ethSigUtil.recoverPersonalSignature(msgParams);
+}
 
 let playerdata = {};
 let needsUpdating = {}
@@ -54,13 +72,36 @@ app.get('/', (req, res) => {
 });
 
 io.on("connection", (socket) => {
-    console.log("New client connected: " + socket.id);
+    let authData = socket.handshake.auth;
 
-    playerdata[socket.id] = {};
+    let entryKey;
+
+    if(authData.address !== "Guest"){
+        let sigAddress = checkSignature("By signing this message I confirm that this is my own address",authData.signature)
+
+        if(sigAddress !== authData.address){
+            console.log("Auth failed: " + socket.id);
+            socket.disconnect();
+        }else{
+            console.log("Auth as "+sigAddress+": " + socket.id);
+            entryKey = sigAddress;
+        }
+    }else if (authData.address === "Guest"){
+        console.log("Auth as guest: " + socket.id);
+        entryKey = authData.signature;
+    }
+
+    if(playerdata[entryKey]){
+        console.log("User already logged in: " + entryKey);
+        socket.disconnect();       
+    }
+
+    playerdata[entryKey] = {};
     
-    playerdata[socket.id]["xy"] = [90, 34];
-    playerdata[socket.id]["fd"] = directions.down;
-    playerdata[socket.id]["wa"] = false;
+    playerdata[entryKey]["xy"] = [90, 34];
+    playerdata[entryKey]["fd"] = directions.down;
+    playerdata[entryKey]["wa"] = false;
+    playerdata[entryKey]["nm"] = entryKey;
 
     let heldDirections = {
         [directions.up]: false,
@@ -68,29 +109,21 @@ io.on("connection", (socket) => {
         [directions.right]: false,
         [directions.down]: false,
     }
-    playerHeldDirections[socket.id] = heldDirections;
+    playerHeldDirections[entryKey] = heldDirections;
 
     socket.on("ready", () => {
         socket.emit("newmessage", chatMessages)
         socket.emit("rockdata", rockData);
         socket.emit("playerdata", playerdata);
     
-        if(!needsUpdating[socket.id]){
-            needsUpdating[socket.id] = true;
-        }
-    })
-
-    socket.on("setdisplayname", (nickname)=>{
-        playerdata[socket.id]["nm"] = nickname;
-        
-        if(!needsUpdating[socket.id]){
-            needsUpdating[socket.id] = true;
+        if(!needsUpdating[entryKey]){
+            needsUpdating[entryKey] = true;
         }
     })
 
     socket.on("sendmessage", ([nm,msg])=>{
         if(msg.length > 64){
-            console.log(socket.id+"sent a very long message")
+            console.log(entryKey+"sent a very long message")
             return
         }
 
@@ -100,19 +133,19 @@ io.on("connection", (socket) => {
 
         let message = filter.clean(msg)
         chatMessages.push([nm, message])
-        handleMessage(socket.id, message);
+        handleMessage(entryKey, message);
         io.emit("newmessage", chatMessages)
     })
 
     socket.on("move", (heldDirections) => {
-        playerHeldDirections[socket.id] = heldDirections;
+        playerHeldDirections[entryKey] = heldDirections;
         //console.log(socket.id+" requested movement");
     });
 
     socket.on("disconnect", () => {
-        delete playerdata[socket.id];
-        delete playerHeldDirections[socket.id];
-        delete needsUpdating[socket.id]
+        delete playerdata[entryKey];
+        delete playerHeldDirections[entryKey];
+        delete needsUpdating[entryKey]
         io.emit("playerdata", playerdata);
         console.log("Client disconnected: " + socket.id);
     });

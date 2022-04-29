@@ -44,7 +44,7 @@ let defaultHeldKeys = {
 let heldKeys = { ...defaultHeldKeys };
 
 
-const Camera = forwardRef(({ socket, focusChat, isConnected }, cameraRef) => {
+const Camera = forwardRef(({ socket, focusChat, isConnected, identifier }, cameraRef) => {
     const [playerData, setPlayerData] = useState(null);
     const [newData, setNewData] = useState(null)
 
@@ -183,9 +183,9 @@ const Camera = forwardRef(({ socket, focusChat, isConnected }, cameraRef) => {
 
     useEffect(() => {
         const placeCharacters = () => {
-            let x = playerData[socketId]["xy"][0];
-            let y = playerData[socketId]["xy"][1];
-            let player = document.getElementById(socketId + "-character");
+            let x = playerData[identifier]["xy"][0];
+            let y = playerData[identifier]["xy"][1];
+            let player = document.getElementById(identifier + "-character");
 
             let camera_left = (cameraRef.current.clientWidth / 2) - player.clientWidth/2;
             let camera_top = (cameraRef.current.clientHeight / 2) - player.clientHeight;
@@ -206,18 +206,17 @@ const Camera = forwardRef(({ socket, focusChat, isConnected }, cameraRef) => {
                 }
             }
         }
-
-        if (mapRef && playerData && playerData[socketId] && mapRef.current && pixelSize) {
+        if (mapRef && playerData && playerData[identifier] && mapRef.current && pixelSize) {
             placeCharacters();
         }
 
-    }, [playerData, mapRef, socketId, pixelSize])
+    }, [playerData, mapRef, socketId, pixelSize, identifier])
 
     return (
         <div className="camera" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} onBlur={handleFocusOut} ref={cameraRef} tabIndex="0">
             <div className="map pixel-art" ref={mapRef}>
                 <Rocks rockData={rockData} />
-                <Players playerData={playerData} localsocket={socketId} />
+                <Players playerData={playerData} />
             </div>
             <Dpad updateControls={updateControls}/>
         </div>
