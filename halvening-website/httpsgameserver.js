@@ -157,156 +157,160 @@ app.get('/', (req, res) => {
 });
 
 io.on("connection", (socket) => {
-    let authData = socket.handshake.auth;
+    let nonce = Math.floor(Math.random() * 1000000000000) + 1;
 
-    let entryKey;
+    socket.emit("authenticate", nonce);
 
-    if (authData.address !== "Guest") {
-        let sigAddress = checkSignature("By signing this message I confirm that this is my own address", authData.signature)
+    socket.on("authentication", authData => {
+        let entryKey;
 
-        if (sigAddress !== authData.address) {
-            console.log("Auth failed: " + socket.id);
-            socket.emit("err","Signature does not match")
+        if (authData.address !== "Guest") {
+            let sigAddress = checkSignature("By signing this message I confirm that this is my own address\n"+nonce, authData.signature)
+    
+            if (sigAddress !== authData.address) {
+                console.log("Auth failed: " + socket.id);
+                socket.emit("err","Signature does not match")
+                socket.disconnect();
+                return;
+            }
+            
+            console.log("Auth as " + sigAddress + ": " + socket.id);
+            entryKey = sigAddress;
+    
+            const fetchEns = async () => {
+                let name = await provider.lookupAddress(entryKey);
+                return name.split('.')[0];;
+            }
+    
+            fetchEns().then((res) => {
+                if(res){
+                    playerdata[entryKey]["nm"] = res;
+                
+                    if (!needsUpdating[entryKey]) {
+                        needsUpdating[entryKey] = true;
+                    }
+                }
+            });
+            
+        } else if (authData.address === "Guest") {
+            console.log("Auth as guest: " + socket.id);
+            entryKey = authData.signature;
+        }
+    
+        if (playerdata[entryKey]) {
+            console.log("User already logged in: " + entryKey);
+            socket.emit("err","You are already logged in")
             socket.disconnect();
             return;
         }
-        
-        console.log("Auth as " + sigAddress + ": " + socket.id);
-        entryKey = sigAddress;
-
-        const fetchEns = async () => {
-            let name = await provider.lookupAddress(entryKey);
-            return name.split('.')[0];;
+    
+        playerdata[entryKey] = {};
+    
+        playerdata[entryKey]["xy"] = [90, 34];
+        playerdata[entryKey]["fd"] = directions.down;
+        playerdata[entryKey]["wa"] = false;
+        playerdata[entryKey]["nm"] = entryKey;
+    
+        let heldDirections = {
+            [directions.up]: false,
+            [directions.left]: false,
+            [directions.right]: false,
+            [directions.down]: false,
         }
-
-        fetchEns().then((res) => {
-            if(res){
-                playerdata[entryKey]["nm"] = res;
-            
-                if (!needsUpdating[entryKey]) {
-                    needsUpdating[entryKey] = true;
-                }
-            }
-        });
-        
-    } else if (authData.address === "Guest") {
-        console.log("Auth as guest: " + socket.id);
-        entryKey = authData.signature;
-    }
-
-    if (playerdata[entryKey]) {
-        console.log("User already logged in: " + entryKey);
-        socket.emit("err","You are already logged in")
-        socket.disconnect();
-        return;
-    }
-
-    playerdata[entryKey] = {};
-
-    playerdata[entryKey]["xy"] = [90, 34];
-    playerdata[entryKey]["fd"] = directions.down;
-    playerdata[entryKey]["wa"] = false;
-    playerdata[entryKey]["nm"] = entryKey;
-
-    let heldDirections = {
-        [directions.up]: false,
-        [directions.left]: false,
-        [directions.right]: false,
-        [directions.down]: false,
-    }
-
-    playerHeldDirections[entryKey] = heldDirections;
-
-    if (!needsUpdating[entryKey]) {
-        needsUpdating[entryKey] = true;
-    }
-
-    //planck body definition
-    const playerBody = world.createBody({
-        type: 'dynamic', //should be moved only applying velocity
-        position: planck.Vec2(
-            (mapGridBaseLength + (mapGridLength / 2.0)) * mapGridSize, 
-            (mapGridBaseHeigth + (mapGridHeigth / 2.0)) * mapGridSize
-        ), //setup initial position
-        angle: 0.0 * Math.PI, //setup initial angle in radians
-        linearDamping: 0, //set to 0 because causes bodies to float
-        angularDamping: 0, //set to 0 because causes bodies to float
-        gravityScale: 0, //does not apply gravity
-        allowSleep: true, //allows the server to remove from calculation when needed
-        awake: true, //starts awake
-        fixedRotation: true, //disables rotation movement
-        bullet: false, //if true increases checks for collisions
-        active: true, //if false collisions with this body are completely disabled
-        userData: entryKey, //free pointer to use
-    });
-    //optional mass configuration
-    // playerBody.setMassData({
-    //     I: 0, //0 disables rotation: 1 rotates normally, 0.1 rotates fast, 1000 rotates slowly
-    //     mass: 1, //cannot be 0 for dynamic bodies
-    //     center: planck.Vec2(0, 0), //defaults to center of body
-    // });
-    playerBodies[entryKey] = playerBody;
-    //body shape initialization
-    const playerShape = planck.Box(mapGridSize / 2, mapGridSize / 2); //created with half extents
-    //body fixiture initialization
-    const playerCollisionGroupIndex = -1; //all fixitures of bodies that are in the same negative group wont collide
-    const rockCollisionGroupIndex = -2; //all fixitures of bodies that are in the same negative group wont collide
-
-    const playerCollisionCategoryBits = 0x0002; //category of collision
-    const rockCollisionCategoryBits = 0x0004; //category of collision
-
-    const playerCollisionMaskBits = 0xFFFF ^ playerCollisionCategoryBits; //categories to collide with (all except players themselves)
-    const rockCollisionMaskBits = 0xFFFF ^ rockCollisionCategoryBits; //categories to collide with (all except rock themselves)
-
-    const playerFixiture = playerBody.createFixture({ //non importa salvare playerFixiture
-        shape: playerShape,
-        density: 0, //density of the body, used with mass data to calculate weight, with 0 density behaves like it has 0 mass
-        friction: 0, //no friction
-        restitution: 0, //no restitution when colliding
-        isSensor: false, //this is not a sensor
-        filterGroupIndex: playerCollisionGroupIndex,
-        filterCategoryBits: playerCollisionCategoryBits,
-        filterMaskBits: playerCollisionMaskBits
-    });
-
-
-    socket.on("ready", () => {
-        socket.emit("newmessage", chatMessages)
-        socket.emit("rockdata", rockData);
-        socket.emit("playerdata", playerdata);
-
+    
+        playerHeldDirections[entryKey] = heldDirections;
+    
         if (!needsUpdating[entryKey]) {
             needsUpdating[entryKey] = true;
         }
+            
+        //planck body definition
+        const playerBody = world.createBody({
+            type: 'dynamic', //should be moved only applying velocity
+            position: planck.Vec2(
+                (mapGridBaseLength + mapGridLength) * mapGridSize / 2.0, 
+                (mapGridBaseHeigth + mapGridHeigth) * mapGridSize / 2.0
+            ), //setup initial position
+            angle: 0.0 * Math.PI, //setup initial angle in radians
+            linearDamping: 0, //set to 0 because causes bodies to float
+            angularDamping: 0, //set to 0 because causes bodies to float
+            gravityScale: 0, //does not apply gravity
+            allowSleep: true, //allows the server to remove from calculation when needed
+            awake: true, //starts awake
+            fixedRotation: true, //disables rotation movement
+            bullet: false, //if true increases checks for collisions
+            active: true, //if false collisions with this body are completely disabled
+            userData: entryKey, //free pointer to use
+        });
+        //optional mass configuration
+        // playerBody.setMassData({
+        //     I: 0, //0 disables rotation: 1 rotates normally, 0.1 rotates fast, 1000 rotates slowly
+        //     mass: 1, //cannot be 0 for dynamic bodies
+        //     center: planck.Vec2(0, 0), //defaults to center of body
+        // });
+        playerBodies[entryKey] = playerBody;
+        //body shape initialization
+        const playerShape = planck.Box(mapGridSize / 2, mapGridSize / 2); //created with half extents
+        //body fixiture initialization
+        const playerCollisionGroupIndex = -1; //all fixitures of bodies that are in the same negative group wont collide
+        const rockCollisionGroupIndex = -2; //all fixitures of bodies that are in the same negative group wont collide
+
+        const playerCollisionCategoryBits = 0x0002; //category of collision
+        const rockCollisionCategoryBits = 0x0004; //category of collision
+
+        const playerCollisionMaskBits = 0xFFFF ^ playerCollisionCategoryBits; //categories to collide with (all except players themselves)
+        const rockCollisionMaskBits = 0xFFFF ^ rockCollisionCategoryBits; //categories to collide with (all except rock themselves)
+
+        const playerFixiture = playerBody.createFixture({ //non importa salvare playerFixiture
+            shape: playerShape,
+            density: 0, //density of the body, used with mass data to calculate weight, with 0 density behaves like it has 0 mass
+            friction: 0, //no friction
+            restitution: 0, //no restitution when colliding
+            isSensor: false, //this is not a sensor
+            filterGroupIndex: playerCollisionGroupIndex,
+            filterCategoryBits: playerCollisionCategoryBits,
+            filterMaskBits: playerCollisionMaskBits
+        });
+
+
+        socket.on("ready", () => {
+            socket.emit("newmessage", chatMessages)
+            socket.emit("rockdata", rockData);
+            socket.emit("playerdata", playerdata);
+
+            if (!needsUpdating[entryKey]) {
+                needsUpdating[entryKey] = true;
+            }
+        })
+
+        socket.on("sendmessage", ([nm, msg]) => {
+            if (msg.length > 64) {
+                console.log(entryKey + "sent a very long message")
+                return;
+            }
+
+            if (chatMessages.length >= 16) {
+                chatMessages.shift()
+            }
+
+            let message = filter.clean(msg)
+            chatMessages.push([nm, message])
+            handleMessage(entryKey, message);
+            io.emit("newmessage", chatMessages)
+        })
+
+        socket.on("move", (heldDirections) => {
+            playerHeldDirections[entryKey] = heldDirections;
+        });
+
+        socket.on("disconnect", () => {
+            delete playerdata[entryKey];
+            delete playerHeldDirections[entryKey];
+            delete needsUpdating[entryKey]
+            io.emit("playerdata", playerdata);
+            console.log("Client disconnected: " + socket.id);
+        });
     })
-
-    socket.on("sendmessage", ([nm, msg]) => {
-        if (msg.length > 64) {
-            console.log(entryKey + "sent a very long message")
-            return;
-        }
-
-        if (chatMessages.length >= 16) {
-            chatMessages.shift()
-        }
-
-        let message = filter.clean(msg)
-        chatMessages.push([nm, message])
-        handleMessage(entryKey, message);
-        io.emit("newmessage", chatMessages)
-    })
-
-    socket.on("move", (heldDirections) => {
-        playerHeldDirections[entryKey] = heldDirections;
-    });
-
-    socket.on("disconnect", () => {
-        delete playerdata[entryKey];
-        delete playerHeldDirections[entryKey];
-        delete needsUpdating[entryKey]
-        io.emit("playerdata", playerdata);
-        console.log("Client disconnected: " + socket.id);
-    });
 });
 
 server.listen(4001, () => {

@@ -46,13 +46,18 @@ const Game = ({
       let IOsocket;
       const authenticate = async (msg, address) => {
          IOsocket = socketIOClient(ENDPOINT,{
-            auth:{
-               signature: msg,
-               address: address
-            }
          });
+
          setSocket(IOsocket);
          setIdentifier(msg)
+         
+         IOsocket.on("authenticate", () => {
+            let auth = {signature: msg, address: address}
+
+            IOsocket.emit("authentication",auth)
+            setIsConnected(true);
+
+         })
          
          IOsocket.on("newmessage", chat => {
             setChatData(chat);
@@ -82,19 +87,29 @@ const Game = ({
    useEffect(()=>{
       let IOsocket;
       const authenticate = async (msg, address) => {
-         const web3Provider = new Web3Provider(provider).getSigner();
-         
-         let signedMsg = await web3Provider.signMessage(msg, address)
 
          IOsocket = socketIOClient(ENDPOINT,{
-            auth:{
-               signature: signedMsg,
-               address: address
-            }
          });
+
+         //IOsocket = socketIOClient(ENDPOINT,{
+         //   auth:{
+         //      signature: signedMsg,
+         //      address: address
+         //   }
+         //});
          
          setSocket(IOsocket);
          setIdentifier(address)
+
+         IOsocket.on("authenticate", nonce => {
+            const web3Provider = new Web3Provider(provider).getSigner();
+         
+            web3Provider.signMessage(msg+nonce, address).then((signedMsg) => {
+               let auth = {signature: signedMsg, address: address}
+               IOsocket.emit("authentication",auth)
+               setIsConnected(true);
+            })
+         })
 
          IOsocket.on("newmessage", chat => {
             setChatData(chat);
@@ -105,7 +120,7 @@ const Game = ({
          })
    
          IOsocket.on("connect", () => {
-            setIsConnected(true)
+            
          })
    
          IOsocket.on("disconnect", (err) => {
@@ -115,7 +130,7 @@ const Game = ({
 
       if(account){
          setIsGuest(false)
-         authenticate("By signing this message I confirm that this is my own address", account)
+         authenticate("By signing this message I confirm that this is my own address\n", account)
       }
 
       return () => {
