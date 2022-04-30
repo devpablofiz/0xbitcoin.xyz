@@ -174,7 +174,7 @@ for(const [rockIndex, rockValue] of Object.entries(rockData)) {
         fixedRotation: true, //disables rotation movement
         bullet: false, //if true increases checks for collisions
         active: true, //if false collisions with this body are completely disabled
-        userData: entryKey, //free pointer to use
+        userData: "rock-"+rockIndex, //free pointer to use
     });
     //optional mass configuration
     // rockBody.setMassData({
@@ -184,7 +184,7 @@ for(const [rockIndex, rockValue] of Object.entries(rockData)) {
     // });
     rockBodies[rockIndex] = rockBody;
     //body shape initialization
-    const rockShape = planck.Box(mapGridSize / 2, mapGridSize / 2, planck.Vec2(0, -4 / scale), 0 * Math.PI); //created with half extents, second parameter is the position relative to the center of the body, third parameter the rotation
+    const rockShape = planck.Box(mapGridSize / 2, mapGridSize / 4, planck.Vec2(0, -4 / scale), 0 * Math.PI); //created with half extents, second parameter is the position relative to the center of the body, third parameter the rotation
 
     const rockFixiture = rockBody.createFixture({ //non importa salvare playerFixiture
         shape: rockShape,
@@ -347,7 +347,7 @@ io.on("connection", (socket) => {
             if(!msg){
                 return;
             }
-            
+
             if (msg.length > 64) {
                 console.log(entryKey + "sent a very long message")
                 return;
