@@ -58,6 +58,10 @@ const Game = ({
             setIsConnected(true);
 
          })
+
+         IOsocket.on("err", err => {
+            setError(err);
+         })
          
          IOsocket.on("newmessage", chat => {
             setChatData(chat);

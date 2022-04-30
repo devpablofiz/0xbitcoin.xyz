@@ -25,6 +25,13 @@ const server = https.createServer({
     cert: certificate
 }, app);
 
+const io = require("socket.io")(server, {
+    cors: {
+        origins: ["https://www.0xbitcoin.xyz", "https://0xbitcoin.xyz", "https://halvening.0xbitcoin.xyz", "http://localhost:3000"],
+        methods: ["GET", "POST"]
+    }
+});
+
 
 /**
  * Dichiarazione server Http (localhost test)
@@ -59,16 +66,76 @@ let filter = new Filter();
 let chatMessages = [];
 let playerHeldDirections = {};
 
-const handleMessage = (socket, msg) => {
-    playerdata[socket]["msg"] = msg;
-    if (!needsUpdating[socket]) {
-        needsUpdating[socket] = true;
+let playerSockets = {}
+let mods = ["0x995e3e70f983d231a212c2a7210fc36a5b70cc39"];
+let bans = [];
+
+const commands = {
+    kick: "kick",
+    ban: "ban",
+    say: "say"
+}
+
+const handleCommand = (entryKey, msg) => {
+    if(!mods.includes(entryKey)){
+        console.log(entryKey+"not a mod");
+        return;
+    }
+
+    let [command, target, ...others] = msg.substring(1).split(' ');
+    let reason;
+
+    switch(command) {
+        case commands.kick:
+            reason = others.join(" ")
+
+            for (const [key, value] of Object.entries(playerdata)) {
+                if(playerdata[key]["nm"] === target){
+                    playerSockets[key].emit("err","You have been kicked for "+reason)
+                    playerSockets[key].disconnect()
+                    console.log("Kicked "+key+" for "+reason)
+                    chatMessages.push(["[SERVER]", target+" has been kicked for "+reason])
+                    io.emit("newmessage", chatMessages)
+                }
+            }
+            break;
+        case commands.ban:
+            reason = others.join(" ")
+
+            for (const [key, value] of Object.entries(playerdata)) {
+                if(playerdata[key]["nm"] === target){
+                    playerSockets[key].emit("err","You have been banned for "+reason)
+                    playerSockets[key].disconnect()
+                    console.log("Banned "+key+" for "+reason)
+                    chatMessages.push(["[SERVER]", target+" has been banned for "+reason])
+                    io.emit("newmessage", chatMessages)
+                    bans.push(key)
+                }
+            }
+            break;
+        case commands.say:
+            if(others){
+                target = target + " " + others.join(" ")
+            }
+            chatMessages.push(["[SERVER]", target])
+            io.emit("newmessage", chatMessages)
+            break;
+        default:
+            //code block
+    }
+}
+
+const handleMessage = (entryKey, msg) => {
+
+    playerdata[entryKey]["msg"] = msg;
+    if (!needsUpdating[entryKey]) {
+        needsUpdating[entryKey] = true;
     }
     setTimeout(() => {
-        if (playerdata[socket] && playerdata[socket]["msg"] === msg) {
-            playerdata[socket]["msg"] = "";
-            if (!needsUpdating[socket]) {
-                needsUpdating[socket] = true;
+        if (playerdata[entryKey] && playerdata[entryKey]["msg"] === msg) {
+            playerdata[entryKey]["msg"] = "";
+            if (!needsUpdating[entryKey]) {
+                needsUpdating[entryKey] = true;
             }
         }
     }, 2000);
@@ -209,12 +276,7 @@ for(const [rockIndex, rockValue] of Object.entries(rockData)) {
 
 
 
-const io = require("socket.io")(server, {
-    cors: {
-        origins: ["https://www.0xbitcoin.xyz", "https://0xbitcoin.xyz", "https://halvening.0xbitcoin.xyz", "http://localhost:3000"],
-        methods: ["GET", "POST"]
-    }
-});
+
 
 app.get('/', (req, res) => {
     res.send('<h1>Hello world</h1>');
@@ -240,35 +302,24 @@ io.on("connection", (socket) => {
             
             console.log("Auth as " + sigAddress + ": " + socket.id);
             entryKey = sigAddress;
-    
-            const fetchEns = async () => {
-                let name = await provider.lookupAddress(entryKey);
-                if(name){
-                    return name.split('.')[0];
-                }else{
-                    return false;
-                }
-                
-            }
-    
-            fetchEns().then((res) => {
-                if(res){
-                    playerdata[entryKey]["nm"] = res;
-                
-                    if (!needsUpdating[entryKey]) {
-                        needsUpdating[entryKey] = true;
-                    }
-                }
-            });
+            playerSockets[entryKey] = socket;
             
         } else if (authData.address === "Guest") {
             console.log("Auth as guest: " + socket.id);
             entryKey = authData.signature;
+            playerSockets[entryKey] = socket;
         }
     
         if (playerdata[entryKey]) {
             console.log("User already logged in: " + entryKey);
             socket.emit("err","You are already logged in")
+            socket.disconnect();
+            return;
+        }
+
+        if (bans.includes(entryKey)){
+            console.log("Banned user tried logging in: " + entryKey);
+            socket.emit("err","You are banned")
             socket.disconnect();
             return;
         }
@@ -278,8 +329,38 @@ io.on("connection", (socket) => {
         playerdata[entryKey]["xy"] = [90, 34];
         playerdata[entryKey]["fd"] = directions.down;
         playerdata[entryKey]["wa"] = false;
-        playerdata[entryKey]["nm"] = entryKey;
-    
+        
+        //Guest
+        if(entryKey === authData.signature){
+            playerdata[entryKey]["nm"] = entryKey;
+            if (!needsUpdating[entryKey]) {
+                needsUpdating[entryKey] = true;
+            }
+        }else{
+            const fetchEns = async () => {
+                let name = await provider.lookupAddress(entryKey);
+                if(name){
+                    return name.split('.')[0];
+                }else{
+                    return false;
+                }
+            }
+
+            playerdata[entryKey]["nm"] = "Loading...";
+
+            fetchEns().then((res) => {
+                if(res){
+                    playerdata[entryKey]["nm"] = res;
+                }else{
+                    playerdata[entryKey]["nm"] = entryKey.substring(0, 10);
+                }
+
+                if (!needsUpdating[entryKey]) {
+                    needsUpdating[entryKey] = true;
+                }
+            });
+        }
+
         let heldDirections = {
             [directions.up]: false,
             [directions.left]: false,
@@ -353,14 +434,18 @@ io.on("connection", (socket) => {
                 return;
             }
 
+            if(msg.startsWith("/")){
+                handleCommand(entryKey, msg);
+            }else{
+                let message = filter.clean(msg)
+                chatMessages.push([playerdata[entryKey]["nm"], message])
+                handleMessage(entryKey, message);
+                io.emit("newmessage", chatMessages)
+            }
+
             if (chatMessages.length >= 16) {
                 chatMessages.shift()
             }
-
-            let message = filter.clean(msg)
-            chatMessages.push([playerdata[entryKey]["nm"], message])
-            handleMessage(entryKey, message);
-            io.emit("newmessage", chatMessages)
         })
 
         socket.on("move", (heldDirections) => {
