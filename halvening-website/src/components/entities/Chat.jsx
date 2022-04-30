@@ -3,18 +3,18 @@ import React, { forwardRef } from "react";
 import { renderMessages } from '../../utils';
 import { ChatButton } from '../../components'
 
-const Chat = forwardRef((props, chatRef) => {
-    if (!props.chatData) {
+const Chat = forwardRef(({socket, chatData, focusCamera, identifier}, chatRef) => {
+    if (!chatData) {
         return null;
     } else {
         return (
             <div className='chat-container'>
                 <div className='chat'>
                     <div>
-                        {renderMessages(props.chatData)}
+                        {renderMessages(chatData)}
                     </div>
                 </div>
-                <ChatButton ref={chatRef} {...props} />
+                <ChatButton socket={socket} focusCamera={focusCamera} identifier={identifier} ref={chatRef}/>
             </div>
         );
     }

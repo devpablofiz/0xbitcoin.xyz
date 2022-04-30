@@ -300,7 +300,11 @@ io.on("connection", (socket) => {
             }
         })
 
-        socket.on("sendmessage", ([nm, msg]) => {
+        socket.on("sendmessage", (msg) => {
+            if(!msg){
+                return;
+            }
+            
             if (msg.length > 64) {
                 console.log(entryKey + "sent a very long message")
                 return;
@@ -311,7 +315,7 @@ io.on("connection", (socket) => {
             }
 
             let message = filter.clean(msg)
-            chatMessages.push([playerdata[nm]["nm"], message])
+            chatMessages.push([playerdata[entryKey]["nm"], message])
             handleMessage(entryKey, message);
             io.emit("newmessage", chatMessages)
         })

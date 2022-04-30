@@ -2,14 +2,14 @@ import React, { useEffect, forwardRef } from 'react'
 import '../../Game.css';
 import { Button, FormControl,InputGroup } from 'react-bootstrap';
 
-const ChatButton = forwardRef((props, chatRef) => {
+const ChatButton = forwardRef(({socket, identifier, focusCamera}, chatRef) => {
 
     function sendMsg() {
         if (chatRef.current.value.trim() !== "") {
-            props.socket.emit("sendmessage", [props.nickName, chatRef.current.value]);
+            socket.emit("sendmessage", [identifier, chatRef.current.value]);
         }
         chatRef.current.value = ""
-        props.focusCamera();
+        focusCamera();
     }
 
     useEffect(() => {
@@ -19,18 +19,18 @@ const ChatButton = forwardRef((props, chatRef) => {
         }
 
         function unFocusChat() {
-            props.focusCamera();
+            focusCamera();
         }
 
         function send() {
             if (chatRef.current.value.trim() !== "") {
-                props.socket.emit("sendmessage", [props.nickName, chatRef.current.value]);
+                socket.emit("sendmessage", chatRef.current.value);
             }
             resetText();
             unFocusChat();
         }
 
-        if (props.nickName != null) {
+        if (identifier != null) {
             chatRef.current.addEventListener("keyup", async (e) => {
                 if (e.code === "Enter") {
                     send();
@@ -39,7 +39,7 @@ const ChatButton = forwardRef((props, chatRef) => {
                 }
             });
         }
-    }, [props.nickName, chatRef, props.socket])
+    }, [identifier, chatRef, socket])
 
     return (
         <div className='chat-button' >
