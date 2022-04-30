@@ -52,6 +52,8 @@ function checkSignature(nonce, signature) {
 }
 
 let playerdata = {};
+//world bodies that need to get deleted after disconnection
+let toDelete = []
 let needsUpdating = {}
 let rockData = { 1: { 'xy': [100, 40] }, 2: { 'xy': [109, 80] } };
 let filter = new Filter();
@@ -88,7 +90,8 @@ const directions = {
 //physics setup - planck.js
 const planck = require('planck');
 //player speed
-let speed = 500;
+let speed = 1.2;
+let scale = 10;
 
 //world setup
 const gravity = planck.Vec2(0.0, 0.0);
@@ -108,16 +111,22 @@ const positionIterations = 20;
 // var bottomLimit = (16 * 7);
 
 //map chain edge shape
-const mapGridSize = 16;
-const mapGridBaseLength = -2;
-const mapGridBaseHeigth = 2;
+const mapGridSize = 16 / scale;
+const mapGridBaseLength = -0.5;
+const mapGridBaseHeigth = 2.9375;
 const mapGridLength = 12;
-const mapGridHeigth = 6;
+const mapGridHeigth = 6.1875;
+//const mapEdgeVertices = [
+//    planck.Vec2((mapGridBaseLength)                 * mapGridSize, (mapGridBaseHeigth)                 * mapGridSize),    //top left
+//    planck.Vec2((mapGridBaseLength + mapGridLength) * mapGridSize, (mapGridBaseHeigth)                 * mapGridSize),   //top right
+//    planck.Vec2((mapGridBaseLength + mapGridLength) * mapGridSize, (mapGridBaseHeigth + mapGridHeigth) * mapGridSize),   //bottom right
+//    planck.Vec2((mapGridBaseLength)                 * mapGridSize, (mapGridBaseHeigth + mapGridHeigth) * mapGridSize)     //bottom left
+//];
 const mapEdgeVertices = [
-    planck.Vec2((mapGridBaseLength)                 * mapGridSize, (mapGridBaseHeigth)                 * mapGridSize),    //top left
-    planck.Vec2((mapGridBaseLength + mapGridLength) * mapGridSize, (mapGridBaseHeigth)                 * mapGridSize),   //top right
-    planck.Vec2((mapGridBaseLength + mapGridLength) * mapGridSize, (mapGridBaseHeigth + mapGridHeigth) * mapGridSize),   //bottom right
-    planck.Vec2((mapGridBaseLength)                 * mapGridSize, (mapGridBaseHeigth + mapGridHeigth) * mapGridSize)     //bottom left
+    planck.Vec2(-8.0 / scale, 20.0 / scale),    //top left
+    planck.Vec2(184.0 / scale, 20.0 / scale),   //top right
+    planck.Vec2(184.0 / scale, 120.0 / scale),   //bottom right
+    planck.Vec2(-8.0 / scale, 120.0 / scale)     //bottom left
 ];
 const mapChain = planck.Chain(mapEdgeVertices, true);
 const mapBody = world.createBody({
@@ -179,7 +188,12 @@ io.on("connection", (socket) => {
     
             const fetchEns = async () => {
                 let name = await provider.lookupAddress(entryKey);
-                return name.split('.')[0];;
+                if(name){
+                    return name.split('.')[0];
+                }else{
+                    return false;
+                }
+                
             }
     
             fetchEns().then((res) => {
@@ -228,8 +242,8 @@ io.on("connection", (socket) => {
         const playerBody = world.createBody({
             type: 'dynamic', //should be moved only applying velocity
             position: planck.Vec2(
-                (mapGridBaseLength + mapGridLength) * mapGridSize / 2.0, 
-                (mapGridBaseHeigth + mapGridHeigth) * mapGridSize / 2.0
+                ((mapGridBaseLength + mapGridLength) * mapGridSize / 2.0), 
+                ((mapGridBaseHeigth + mapGridHeigth) * mapGridSize / 2.0)
             ), //setup initial position
             angle: 0.0 * Math.PI, //setup initial angle in radians
             linearDamping: 0, //set to 0 because causes bodies to float
@@ -257,6 +271,9 @@ io.on("connection", (socket) => {
 
         const playerCollisionCategoryBits = 0x0002; //category of collision
         const rockCollisionCategoryBits = 0x0004; //category of collision
+
+        //const collideWithAllMask = 0xFFFF;
+        //const collideWithAllGroup = 1;
 
         const playerCollisionMaskBits = 0xFFFF ^ playerCollisionCategoryBits; //categories to collide with (all except players themselves)
         const rockCollisionMaskBits = 0xFFFF ^ rockCollisionCategoryBits; //categories to collide with (all except rock themselves)
@@ -294,7 +311,7 @@ io.on("connection", (socket) => {
             }
 
             let message = filter.clean(msg)
-            chatMessages.push([nm, message])
+            chatMessages.push([playerdata[nm]["nm"], message])
             handleMessage(entryKey, message);
             io.emit("newmessage", chatMessages)
         })
@@ -306,7 +323,9 @@ io.on("connection", (socket) => {
         socket.on("disconnect", () => {
             delete playerdata[entryKey];
             delete playerHeldDirections[entryKey];
-            delete needsUpdating[entryKey]
+            delete needsUpdating[entryKey];
+            toDelete.push(playerBodies[entryKey])
+            delete playerBodies[entryKey];
             io.emit("playerdata", playerdata);
             console.log("Client disconnected: " + socket.id);
         });
@@ -356,9 +375,7 @@ function gameLoop() {
             }
 
             const movementVector = planck.Vec2(Math.cos(directionAngle), Math.sin(directionAngle));
-            //console.log(movementVector);
-            movementVector.mul(speed);
-            //console.log(movementVector);
+            movementVector.mul(speed*scale);
             playerBody.setLinearVelocity(movementVector); //qui è possibile inizializzare movementVector a player.getLinearVelocity, sommarci i valori e poi fare set
         } else if (!walking) {
             const movementVector = planck.Vec2(0, 0);
@@ -378,7 +395,7 @@ function gameLoop() {
         // if (y > bottomLimit) { y = bottomLimit; }
         //console.log(entryKey + " moved to " + [x, y]);
         const playerPosition = playerBody.getPosition();
-        playerdata[entryKey]["xy"] = [Math.round(playerPosition.x), Math.round(playerPosition.y)];
+        playerdata[entryKey]["xy"] = [Math.round(playerPosition.x * scale) , Math.round(playerPosition.y * scale)];
         playerdata[entryKey]["fd"] = facingDirection;
         playerdata[entryKey]["wa"] = walking;
 
@@ -391,7 +408,7 @@ function gameLoop() {
     }
 
     if (debugPrint > ticksPerSecond * 1) {
-        console.log(playerdata);
+        //console.log(playerdata);
         io.emit("playerdata", playerdata);
         debugPrint = 0;
     }
@@ -415,6 +432,11 @@ function gameLoop() {
     world.step(timeStep, velocityIterations, positionIterations);
     //planck clearForces clear forces applied to bodies
     world.clearForces();
+
+    for(const entry of toDelete){
+        world.destroyBody(entry);
+    }
+    toDelete = []
 
     //TODO: https://github.com/shakiba/planck.js/wiki/World#exploring-the-world
     //fare l'esplorazione al posto del gameloop per aggiornare i playerData (FATTO SOPRA DOVE AGGIORNA LA POSIZIONE DEL PLAYER)
