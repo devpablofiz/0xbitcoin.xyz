@@ -55,7 +55,6 @@ let playerdata = {};
 //world bodies that need to get deleted after disconnection
 let toDelete = []
 let needsUpdating = {}
-let rockData = { 1: { 'xy': [100, 40] }, 2: { 'xy': [109, 80] } };
 let filter = new Filter();
 let chatMessages = [];
 let playerHeldDirections = {};
@@ -140,11 +139,67 @@ const maxFixiture = mapBody.createFixture({
     restitution: 0
 });
 
+//body fixiture initialization
+const playerCollisionGroupIndex = -1; //all fixitures of bodies that are in the same negative group wont collide
+const rockCollisionGroupIndex = -2; //all fixitures of bodies that are in the same negative group wont collide
+
+const playerCollisionCategoryBits = 0x0002; //category of collision
+const rockCollisionCategoryBits = 0x0004; //category of collision
+
+//const collideWithAllMask = 0xFFFF;
+//const collideWithAllGroup = 1;
+
+const playerCollisionMaskBits = 0xFFFF ^ playerCollisionCategoryBits; //categories to collide with (all except players themselves)
+const rockCollisionMaskBits = 0xFFFF ^ rockCollisionCategoryBits; //categories to collide with (all except rock themselves)
 
 
 //bodies pointers
 const playerBodies = {};
+const rockBodies = {};
 
+const rockData = { 1: { 'xy': [100, 40] }, 2: { 'xy': [109, 80] } };
+//create rock body
+for(const [rockIndex, rockValue] of Object.entries(rockData)) {
+    const [x, y] = rockValue["xy"];
+    //planck body definition
+    const rockBody = world.createBody({
+        type: 'static', //should be moved only applying velocity
+        position: planck.Vec2(x / scale, y / scale), //setup initial position
+        angle: 0.0 * Math.PI, //setup initial angle in radians
+        linearDamping: 0, //set to 0 because causes bodies to float
+        angularDamping: 0, //set to 0 because causes bodies to float
+        gravityScale: 0, //does not apply gravity
+        allowSleep: true, //allows the server to remove from calculation when needed
+        awake: true, //starts awake
+        fixedRotation: true, //disables rotation movement
+        bullet: false, //if true increases checks for collisions
+        active: true, //if false collisions with this body are completely disabled
+        userData: entryKey, //free pointer to use
+    });
+    //optional mass configuration
+    // rockBody.setMassData({
+    //     I: 0, //0 disables rotation: 1 rotates normally, 0.1 rotates fast, 1000 rotates slowly
+    //     mass: 1, //cannot be 0 for dynamic bodies
+    //     center: planck.Vec2(0, 0), //defaults to center of body
+    // });
+    rockBodies[rockIndex] = rockBody;
+    //body shape initialization
+    const rockShape = planck.Box(mapGridSize / 2, mapGridSize / 2); //created with half extents
+
+    const rockFixiture = rockBody.createFixture({ //non importa salvare playerFixiture
+        shape: rockShape,
+        density: 0, //density of the body, used with mass data to calculate weight, with 0 density behaves like it has 0 mass
+        friction: 0, //no friction
+        restitution: 0, //no restitution when colliding
+        isSensor: false, //this is not a sensor
+        filterGroupIndex: rockCollisionGroupIndex,
+        filterCategoryBits: rockCollisionCategoryBits,
+        filterMaskBits: rockCollisionMaskBits
+    });
+
+    const rockPosition = rockBody.getPosition();
+    rockData[rockIndex]["xy"] = [Math.round(rockPosition.x * scale) , Math.round(rockPosition.y * scale)];
+}
 
 
 
@@ -265,18 +320,6 @@ io.on("connection", (socket) => {
         playerBodies[entryKey] = playerBody;
         //body shape initialization
         const playerShape = planck.Box(mapGridSize / 2, mapGridSize / 2); //created with half extents
-        //body fixiture initialization
-        const playerCollisionGroupIndex = -1; //all fixitures of bodies that are in the same negative group wont collide
-        const rockCollisionGroupIndex = -2; //all fixitures of bodies that are in the same negative group wont collide
-
-        const playerCollisionCategoryBits = 0x0002; //category of collision
-        const rockCollisionCategoryBits = 0x0004; //category of collision
-
-        //const collideWithAllMask = 0xFFFF;
-        //const collideWithAllGroup = 1;
-
-        const playerCollisionMaskBits = 0xFFFF ^ playerCollisionCategoryBits; //categories to collide with (all except players themselves)
-        const rockCollisionMaskBits = 0xFFFF ^ rockCollisionCategoryBits; //categories to collide with (all except rock themselves)
 
         const playerFixiture = playerBody.createFixture({ //non importa salvare playerFixiture
             shape: playerShape,
@@ -291,7 +334,7 @@ io.on("connection", (socket) => {
 
 
         socket.on("ready", () => {
-            socket.emit("newmessage", chatMessages)
+            socket.emit("newmessage", chatMessages);
             socket.emit("rockdata", rockData);
             socket.emit("playerdata", playerdata);
 
