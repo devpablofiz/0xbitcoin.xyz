@@ -6,7 +6,7 @@ const ChatButton = forwardRef(({socket, identifier, focusCamera}, chatRef) => {
 
     function sendMsg() {
         if (chatRef.current.value.trim() !== "") {
-            socket.emit("sendmessage", [identifier, chatRef.current.value]);
+            socket.emit("sendmessage", chatRef.current.value);
         }
         chatRef.current.value = ""
         focusCamera();
@@ -48,7 +48,7 @@ const ChatButton = forwardRef(({socket, identifier, focusCamera}, chatRef) => {
                     placeholder="Say something"
                     id="message"
                     type="text"
-                    maxLength={64}
+                    maxLength={100}
                     ref={chatRef}
                 />
                 <Button className="mobile-only" onClick={sendMsg}> Send </Button>

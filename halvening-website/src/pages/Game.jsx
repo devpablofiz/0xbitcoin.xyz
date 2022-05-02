@@ -3,7 +3,7 @@ import { Stack, Button } from 'react-bootstrap';
 
 import { Web3Provider } from "@ethersproject/providers";
 import socketIOClient from "socket.io-client";
-import { Chat, Camera } from '../components';
+import { Chat } from '../components';
 import { randomFourDigit } from '../utils'
 
 import '../Game.css';
@@ -27,7 +27,8 @@ const Game = ({
    const [socket, setSocket] = useState(null);
    const [error, setError] = useState();
 
-   const [isConnected, setIsConnected] = useState(null)
+   const [isConnected, setIsConnected] = useState(false)
+   const [authAttempted, setAuthAttempted] = useState(false)
 
    const [isGuest, setIsGuest] = useState(false);
 
@@ -44,10 +45,11 @@ const Game = ({
 
    useEffect(()=>{
       let IOsocket;
-      const authenticate = async (msg, address) => {
+      const authenticate = (msg, address) => {
          IOsocket = socketIOClient(ENDPOINT,{
          });
 
+         setIsConnected(true);
          setSocket(IOsocket);
          setIdentifier(msg)
          
@@ -55,8 +57,7 @@ const Game = ({
             let auth = {signature: msg, address: address}
 
             IOsocket.emit("authentication",auth)
-            setIsConnected(true);
-
+            setAuthAttempted(true);
          })
 
          IOsocket.on("err", err => {
@@ -90,7 +91,7 @@ const Game = ({
 
    useEffect(()=>{
       let IOsocket;
-      const authenticate = async (msg, address) => {
+      const authenticate = (msg, address) => {
 
          IOsocket = socketIOClient(ENDPOINT,{
          });
@@ -101,7 +102,8 @@ const Game = ({
          //      address: address
          //   }
          //});
-         
+
+         setIsConnected(true);
          setSocket(IOsocket);
          setIdentifier(address)
 
@@ -111,7 +113,7 @@ const Game = ({
             web3Provider.signMessage(msg+nonce, address).then((signedMsg) => {
                let auth = {signature: signedMsg, address: address}
                IOsocket.emit("authentication",auth)
-               setIsConnected(true);
+               setAuthAttempted(true);
             })
          })
 
@@ -158,7 +160,15 @@ const Game = ({
          </div>
       )
    }
-
+   if (!authAttempted){
+      return (
+         <div className="App-body">
+            <div className="pixel-font mt-5">
+               <p>{"Authenticating..."}</p>
+            </div>
+         </div>
+      )      
+   }
    if (socket && !isConnected) {
       return (
          <div className="App-body">
@@ -172,7 +182,7 @@ const Game = ({
       return (
          <div className="Game-body">
             <div className="container-game">
-               <Camera socket={socket} focusChat={focusChat} identifier={identifier} isConnected={isConnected} ref={cameraRef} />
+               <Canvas socket={socket} focusChat={focusChat} identifier={identifier} isConnected={isConnected} ref={cameraRef} />
                <Chat socket={socket} chatData={chatData} focusCamera={focusCamera} identifier={identifier} ref={chatRef} />
             </div>
          </div>
